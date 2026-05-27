@@ -1,657 +1,1590 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GDT Business Analysis & System Blueprint</title>
-    <style>
-        :root {
-            --gdt-blue: #003B71;
-            --gdt-red: #E30613;
-            --gdt-gold: #F6A800;
-            --bg-light: #F5F7FA;
-            --text-dark: #1A1A2E;
-            --text-muted: #5A6474;
-            --card-bg: #FFFFFF;
-            --border: #D0D7DE;
-        }
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: var(--bg-light);
-            color: var(--text-dark);
-            line-height: 1.7;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GDT TnP — Business Analysis & System Blueprint</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,600;0,9..144,700;1,9..144,400&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --yellow: #D4A843;
+      --yellow-light: #F0E4C8;
+      --yellow-dark: #B8892E;
+      --bg: #FAF4E8;
+      --bg-warm: #F5EDDA;
+      --text: #1A1208;
+      --text-muted: #7A6A4A;
+      --surface: #FFFFFF;
+      --border: #E8DCC4;
+      --green: #3D6B4F;
+    }
 
-        /* HEADER */
-        header {
-            background: linear-gradient(135deg, var(--gdt-blue) 0%, #00527A 100%);
-            color: white;
-            padding: 3rem 2rem 2.5rem;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
-        header::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -10%;
-            width: 400px;
-            height: 400px;
-            background: radial-gradient(circle, rgba(246,168,0,0.15) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-        header::after {
-            content: '';
-            position: absolute;
-            bottom: -30%;
-            left: -5%;
-            width: 300px;
-            height: 300px;
-            background: radial-gradient(circle, rgba(227,6,19,0.1) 0%, transparent 70%);
-            border-radius: 50%;
-        }
-        .header-inner { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; }
-        .header-badge {
-            display: inline-block;
-            background: var(--gdt-gold);
-            color: var(--gdt-blue);
-            font-size: 0.75rem;
-            font-weight: 700;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            padding: 0.3rem 1rem;
-            border-radius: 20px;
-            margin-bottom: 1.2rem;
-        }
-        h1 {
-            font-size: clamp(1.8rem, 4vw, 2.8rem);
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            letter-spacing: -0.5px;
-        }
-        .header-subtitle { font-size: 1.05rem; opacity: 0.85; font-weight: 300; }
-        .header-meta {
-            display: flex;
-            justify-content: center;
-            gap: 2rem;
-            margin-top: 1.5rem;
-            flex-wrap: wrap;
-            font-size: 0.85rem;
-            opacity: 0.75;
-        }
-        .header-meta span { display: flex; align-items: center; gap: 0.4rem; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
 
-        /* CONTAINER */
-        .container { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
 
-        /* NAV TABS */
-        .nav-tabs {
-            display: flex;
-            gap: 0.4rem;
-            background: var(--card-bg);
-            padding: 0.5rem;
-            border-radius: 14px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
-            margin-bottom: 2.5rem;
-            flex-wrap: wrap;
-            position: sticky;
-            top: 1rem;
-            z-index: 100;
-            border: 1px solid var(--border);
-        }
-        .nav-tabs button {
-            flex: 1;
-            min-width: 120px;
-            padding: 0.65rem 1rem;
-            border: none;
-            background: transparent;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 0.85rem;
-            font-weight: 600;
-            color: var(--text-muted);
-            transition: all 0.2s ease;
-        }
-        .nav-tabs button:hover { background: var(--bg-light); color: var(--gdt-blue); }
-        .nav-tabs button.active { background: var(--gdt-blue); color: white; }
+    /* ─── NAV ─────────────────────────────────────────── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      padding: 22px 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: rgba(250,244,232,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 4px 24px rgba(180,140,60,0.07);
+    }
+    .nav-logo {
+      font-family: 'Fraunces', serif;
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      font-style: italic;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    .nav-logo .logo-gdt {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      background: var(--green);
+      color: var(--yellow-light);
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-style: normal;
+      text-transform: uppercase;
+    }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      transition: color 0.25s;
+      position: relative;
+      padding-bottom: 4px;
+    }
+    .nav-links a::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0;
+      width: 100%;
+      height: 2px;
+      background: var(--yellow-dark);
+      transform: scaleX(0);
+      transform-origin: left;
+      transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+      border-radius: 2px;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links a:hover::after { transform: scaleX(1); }
+    .nav-links a.active { color: var(--green); }
+    .nav-links a.active::after { transform: scaleX(1); background: var(--green); }
 
-        /* SECTIONS */
-        .section { display: none; }
-        .section.active { display: block; }
+    .nav-mobile-btn {
+      display: none;
+      flex-direction: column;
+      gap: 5px;
+      cursor: pointer;
+      padding: 8px;
+      background: none;
+      border: none;
+    }
+    .nav-mobile-btn span {
+      display: block;
+      width: 22px;
+      height: 2px;
+      background: var(--text);
+      border-radius: 2px;
+      transition: all 0.3s;
+    }
+    .nav-mobile-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(250,244,232,0.97);
+      backdrop-filter: blur(24px);
+      z-index: 99;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 32px;
+    }
+    .nav-mobile-overlay.open { display: flex; }
+    .nav-mobile-overlay a {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16,1,0.3,1);
+    }
+    .nav-mobile-overlay.open a { opacity: 1; transform: translateY(0); }
+    .nav-mobile-overlay a:nth-child(1) { transition-delay: 0.05s; }
+    .nav-mobile-overlay a:nth-child(2) { transition-delay: 0.1s; }
+    .nav-mobile-overlay a:nth-child(3) { transition-delay: 0.15s; }
+    .nav-mobile-overlay a:nth-child(4) { transition-delay: 0.2s; }
+    .nav-mobile-overlay a:nth-child(5) { transition-delay: 0.25s; }
+    .nav-mobile-overlay a:nth-child(6) { transition-delay: 0.3s; }
+    .nav-mobile-overlay a:nth-child(7) { transition-delay: 0.35s; }
+    .nav-mobile-overlay a:hover { color: var(--green); }
+    .nav-mobile-btn.open span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+    .nav-mobile-btn.open span:nth-child(2) { opacity: 0; }
+    .nav-mobile-btn.open span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
 
-        /* CARD */
-        .card {
-            background: var(--card-bg);
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 16px rgba(0,0,0,0.05);
-            border: 1px solid var(--border);
-        }
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 700;
-            color: var(--gdt-blue);
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-        }
-        .card-tag {
-            font-size: 0.7rem;
-            font-weight: 700;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            background: var(--gdt-gold);
-            color: var(--gdt-blue);
-            padding: 0.2rem 0.7rem;
-            border-radius: 6px;
-        }
+    /* ─── HERO ─────────────────────────────────────────── */
+    .hero {
+      min-height: 100vh;
+      padding: 130px 60px 80px;
+      display: grid;
+      grid-template-columns: 1fr 400px;
+      gap: 70px;
+      align-items: start;
+      max-width: 1200px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-left { padding-top: 20px; }
+    .hero-eyebrow {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .hero-eyebrow::before {
+      content: '';
+      display: block;
+      width: 28px;
+      height: 1.5px;
+      background: var(--green);
+    }
+    .hero h1 {
+      font-family: 'Fraunces', serif;
+      font-size: 58px;
+      font-weight: 700;
+      line-height: 1.06;
+      letter-spacing: -0.02em;
+      margin-bottom: 16px;
+    }
+    .hero h1 .subtitle-line {
+      display: block;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 18px;
+      font-weight: 400;
+      color: var(--text-muted);
+      margin-top: 10px;
+      letter-spacing: 0;
+      font-style: normal;
+    }
+    .hero-role {
+      font-size: 15px;
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      line-height: 1.7;
+      max-width: 480px;
+    }
+    .hero-role strong { color: var(--text); font-weight: 600; }
+    .hero-stats {
+      display: flex;
+      gap: 36px;
+      margin-bottom: 36px;
+      padding: 24px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+    }
+    .stat-value {
+      font-family: 'Fraunces', serif;
+      font-size: 28px;
+      font-weight: 700;
+    }
+    .stat-label {
+      font-size: 10px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 3?).item { margin-bottom: 0.4rem; }
+    ul li::marker { color: var(--yellow); }
+  }
 
-        /* DIAGRAM IMAGE */
-        .diagram-wrap {
-            text-align: center;
-            margin: 1.5rem 0;
-        }
-        .diagram-wrap img {
-            max-width: 100%;
-            height: auto;
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-        }
-        .diagram-label {
-            font-size: 0.8rem;
-            color: var(--text-mutedではありません);
-            margin-top: 0.5 |
-        }
+  /* ─── TABS ─────────────────────────────────────────── */
+  .tabs-nav {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 8px;
+    background: var(--surface);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    box-shadow: 0 4px 20px rgba(180,140,60,0.08);
+    margin-bottom: 60px;
+  }
+  .tabs-nav button {
+    flex: 1;
+    min-width: 120px;
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    border-radius: 10px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+    letter-spacing: 0.02em;
+  }
+  .tabs-nav button:hover { background: var(--bg-warm); color: var(--text); }
+  .tabs-nav button.active { background: var(--text); color: var(--yellow-light); }
 
-        .text-muted { color: var(--text-muted); font-size: 0.9rem; }
+  .tab-section { display: none; }
+  .tab-section.active { display: block; }
 
-        /* GRID */
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1rem;
-        }
+  /* ─── SECTION SHARED ───────────────────────────────── */
+  section { padding: 100px 60px; max-width: 1200px; margin: 0 auto; }
+  .section-header { margin-bottom: 48px; }
+  .section-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-tag::before { content: ''; display: block; width: 20px; height: 1.5px; background: var(--green); }
+  .section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 40px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+  }
+  .section-sub {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-top: 10px;
+    max-width: 500px;
+    line-height: 1.7;
+  }
 
-        /* LISTS */
-        ul { padding-left: 1.5rem; margin-top: 0.5rem; }
-        li { margin-bottom: 0.4rem; }
-        ul li::marker { color: var(--gdt-gold); }
+  /* ─── CARDS ─────────────────────────────────────────── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    transition: border-color 0.25s, box-shadow 0.25s, transform 0.3s cubic-bezier(0.16,1,0.3,1);
+  }
+  .card:hover {
+    border-color: var(--yellow) !important;
+    box-shadow: 0 12px 32px rgba(180,140,60,0.16) !important;
+    transform: translateY(-3px);
+  }
+  .card-title {
+    font-family: 'Fraunces', serif;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 14px;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .card-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    background: var(--bg-warm);
+    color: var(--green);
+    padding: 3px 10px;
+    border-radius: 50px;
+    letter-spacing: 0.06em;
+    font-weight: 500;
+    border: 1px solid var(--border);
+  }
 
-        /* TAGS */
-        .tag {
-            display: inline-block;
-            background: #E8F0FE;
-            color: var(--gdt-blue);
-            font-size: 0.75rem;
-            padding: 0.25rem 0.75rem;
-            border-radius: 20px;
-            font-weight: 600;
-            margin: 0.2rem;
-        }
+  .text-muted { color: var(--text-muted); }
+  .text-strong { color: var(--text); font-weight: 600; }
 
-        /* CODE BLOCKS */
-        pre {
-            background: #1A1A2E;
-            color: #A8D8FF;
-            border-radius: 10px;
-            padding: 1.2rem;
-            overflow-x: auto;
-            margin-top: 1rem;
-            font-size: 0.82rem;
-            line-height: 1.6;
-        }
+  /* ─── DIAGRAM ─────────────────────────────────────────── */
+  .diagram-wrap {
+    text-align: center;
+    margin: 24px 0;
+    position: relative;
+  }
+  .diagram-wrap img {
+    max-width: 100%;
+    height: auto;
+    border-radius: 16px;
+    border: 2px solid var(--border);
+    box-shadow: 0 8px 40px rgba(180,140,60,0.14);
+    transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), box-shadow 0.3s;
+  }
+  .diagram-wrap img:hover {
+    transform: scale(1.03);
+    box-shadow: 0 16px 56px rgba(180,140,60,0.22);
+  }
+  .diagram-caption {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+    letter-spacing: 0.06em;
+    margin-top: 14px;
+  }
 
-        /* TABLE */
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-            font-size: 0.88rem;
-        }
-        th {
-            background: var(--gdt-blue);
-            color: white;
-            padding: 0.7rem 1rem;
-            text-align: left;
-            font-weight: 600;
-        }
-        td {
-            padding: 0.65rem 1rem;
-            border-bottom: 1px solid var(--border);
-        }
-        tr:nth-child(even) td { background: var(--bg-light); }
+  /* ─── GRID ─────────────────────────────────────────── */
+  .grid-2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
 
-        /* PHASES */
-        .phase {
-            border-left: 4px solid var(--gdt-blue);
-            background: var(--bg-light);
-            padding: 1.2rem;
-            border-radius: 0 12px 12px 0;
-            margin-bottom: 1.5rem;
-        }
-        .phase-num {
-            font-size: 0.7rem;
-            font-weight: 700;
-            color: var(--gdt-gold);
-            letter-spacing: 1px;
-            text-transform: uppercase;
-        }
-        .phase-title { font-size: 1.05rem; font-weight: 700; color: var(--gdt-blue); margin: 0.3rem 0; }
-        .phase-desc { font-size: 0.88rem; color: var(--text-muted); }
+  /* ─── TAGS ─────────────────────────────────────────── */
+  .tag {
+    display: inline-block;
+    background: var(--bg-warm);
+    color: var(--text-muted);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 50px;
+    margin: 3px;
+    border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+    letter-spacing: 0.04em;
+  }
+  .tag-green { background: #E8F1EC; color: var(--green); border-color: #C0D9C6; }
 
-        /* FOOTER */
-        footer {
-            text-align: center;
-            padding: 2rem;
-            color: var(--text-muted);
-            font-size: 0.8rem;
-            border-top: 1px solid var(--border);
-            margin-top: 2rem;
-        }
-    </style>
+  /* ─── TABLE ─────────────────────────────────────────── */
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 12px; }
+  th {
+    background: var(--text);
+    color: var(--yellow-light);
+    padding: 10px 16px;
+    text-align: left;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  td {
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: var(--bg-warm); }
+
+  /* ─── PRE / CODE ───────────────────────────────────────── */
+  pre {
+    background: var(--text);
+    color: #F0E4C8;
+    border-radius: 12px;
+    padding: 1.2rem;
+    overflow-x: auto;
+    margin-top: 12px;
+    font-size: 12px;
+    line-height: 1.7;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  /* ─── TIMELINE ─────────────────────────────────────────── */
+  .timeline { position: relative; padding-left: 32px; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 8px; bottom: 0;
+    width: 1.5px;
+    background: var(--border);
+  }
+  .timeline-item { position: relative; margin-bottom: 32px; }
+  .timeline-item::before {
+    content: '';
+    position: absolute;
+    left: -37px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--yellow);
+    border: 2.5px solid var(--bg);
+    box-shadow: 0 0 0 1.5px var(--yellow);
+  }
+  .timeline-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+  }
+  .timeline-item h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 17px;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .timeline-item .company {
+    font-size: 12px;
+    color: var(--green);
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  .timeline-item p { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+  /* ─── PHASE ─────────────────────────────────────────── */
+  .phase {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 26px;
+    margin-bottom: 14px;
+    border-left: 3px solid var(--yellow-dark);
+    transition: border-color 0.25s, box-shadow 0.25s;
+  }
+  .phase:hover { border-color: var(--yellow); box-shadow: 0 8px 24px rgba(180,140,60,0.12); }
+  .phase-num {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--green);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 5px;
+    font-weight: 500;
+  }
+  .phase-title { font-family: 'Fraunces', serif; font-size: 17px; font-weight: 600; margin-bottom: 6px; }
+  .phase-desc { font-size: 13px; color: var(--text-muted); line-height: 1.65; }
+
+  /* ─── FOOTER ─────────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 24px 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* ─── SCROLL PROGRESS ───────────────────────────────── */
+  .scroll-progress {
+    position: fixed;
+    top: 0; left: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--yellow-dark), var(--yellow), var(--yellow-light));
+    z-index: 999;
+    width: 0%;
+    pointer-events: none;
+    box-shadow: 0 0 10px rgba(212,168,67,0.5);
+  }
+
+  /* ─── PARTICLES ANIMATION ───────────────────────────── */
+  .hero-particles {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    border-radius: 20px;
+  }
+  .hero-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,168,67,0.6) 0%, rgba(212,168,67,0) 70%);
+    animation: particleFloat ease-in-out infinite;
+  }
+  .hero-particle.glow { background: radial-gradient(circle, rgba(61,107,79,0.6) 0%, rgba(61,107,79,0) 70%); }
+  @keyframes particleFloat {
+    0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.4; }
+    33% { transform: translateY(-22px) translateX(7px) scale(1.1); opacity: 0.7; }
+    66% { transform: translateY(-10px) translateX(-6px) scale(0.9); opacity: 0.5; }
+  }
+
+  /* ─── REVEAL ANIMATIONS ─────────────────────────────── */
+  .reveal-heading .section-tag {
+    opacity: 0; transform: translateY(14px);
+    transition: opacity 0.5s ease, transform 0.5s cubic-bezier(0.16,1,0.3,1);
+  }
+  .reveal-heading.revealed .section-tag { opacity: 1; transform: translateY(0); }
+  .reveal-heading .section-title {
+    opacity: 0; transform: translateY(36px);
+    transition: opacity 0.6s ease 0.1s, transform 0.6s cubic-bezier(0.16,1,0.3,1) 0.1s;
+  }
+  .reveal-heading.revealed .section-title { opacity: 1; transform: translateY(0); }
+  .reveal-heading .section-sub {
+    opacity: 0; transform: translateY(18px);
+    transition: opacity 0.5s ease 0.2s, transform 0.5s cubic-bezier(0.16,1,0.3,10,1) scale(0.96);
+    transition: opacity 0.5s cubic-bezier(0.16,1,0.3,1), transform 0.5s cubic-bezier(0.16,1,0.3,1);
+  }
+  .stagger-item.revealed { opacity: 1; transform: translateY(0) scale(1); }
+
+  /* ─── RESPONSIVE ─────────────────────────────────────── */
+  @media (max-width: 960px) {
+    nav { padding: 18px 24px; }
+    .nav-links { display: none; }
+    .nav-mobile-btn { display: flex; }
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 110px 24px 60px;
+      gap: 40px;
+      text-align: center;
+    }
+    .hero-left { order: 2; }
+    .hero h1 { font-size: 42px; }
+    .hero-eyebrow { justify-content: center; }
+    .hero-stats { justify-content: center; }
+    section { padding: 80px 24px; }
+    .tabs-nav { position: sticky; top: 70px; z-index: 90; }
+    footer { padding: 24px; flex-direction: column; gap: 8px; text-align: center; }
+  }
+  @media (max-width: 600px) {
+    .section-title { font-size: 30px; }
+    .hero h1 { font-size: 34px; }
+    .hero { padding: 100px 20px 50px; }
+  }
+</style>
 </head>
 <body>
 
-<!-- HEADER -->
-<header>
-    <div class="header-inner">
-        <div class="header-badge">🇰🇭 General Department of Taxation · Cambodia</div>
-        <h1>Business Analysis &<br>System Blueprint</h1>
-        <p class="header-subtitle">TnP Employee Management System — Technical Requirements Document</p>
-        <div class="header-meta">
-            <span>📅 Dec 2025 Draft</span>
-            <span>📄 DT202604231977</span>
-            <span>👤 Business Analysis Agent</span>
-        </div>
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- ─── NAV ─────────────────────────────────────────────── -->
+<nav>
+  <a href="#" class="nav-logo">
+    <span class="logo-gdt">GDT</span>
+    TnP Blueprint
+  </a>
+  <ul class="nav-links">
+    <li><a href="#overview" class="active">Overview</a></li>
+    <li><a href="#flowchart">Flowchart</a></li>
+    <li><a href="#sequence">Sequence</a></li>
+    <li><a href="#classdiagram">Class Diagram</a></li>
+    <li><a href="#datamodel">Data Model</a></li>
+    <li><a href="#roadmap">Roadmap</a></li>
+    <li><a href="#contracts">API Contracts</a></li>
+  </ul>
+  <button class="nav-mobile-btn" id="mobileBtn" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- ─── MOBILE OVERLAY ───────────────────────────────── -->
+<div class="nav-mobile-overlay" id="mobileOverlay">
+  <a href="#overview" onclick="closeMobile()">Overview</a>
+  <a href="#flowchart" onclick="closeMobile()">Flowchart</a>
+  <a href="#sequence" onclick="closeMobile()">Sequence</a>
+  <a href="#classdiagram" onclick="closeMobile()">Class Diagram</a>
+  <a href="#datamodel" onclick="closeMobile()">Data Model</a>
+  <a href="#roadmap" onclick="closeMobile()">Roadmap</a>
+  <a href="#contracts" onclick="closeMobile()">API Contracts</a>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     HERO
+══════════════════════════════════════════════════════ -->
+<div class="hero" id="hero">
+  <div class="hero-particles" id="particles"></div>
+  <div class="hero-left">
+    <div class="hero-eyebrow">Business Analysis Agent · Hermes</div>
+    <h1>
+      GDT TnP System
+      <span class="subtitle-line">Business Analysis & System Blueprint</span>
+    </h1>
+    <p class="hero-role">
+      Technical requirements for the <strong>General Department of Taxation Cambodia</strong> — TnP (Taxation & Payroll) Employee Management System. Document ID: <strong>DT202604231977</strong>
+    </p>
+    <div class="hero-stats">
+      <div>
+        <div class="stat-value">7</div>
+        <div class="stat-label">Modules</div>
+      </div>
+      <div>
+        <div class="stat-value">6</div>
+        <div class="stat-label">Entities</div>
+      </div>
+      <div>
+        <div class="stat-value">4</div>
+        <div class="stat-label">User Roles</div>
+      </div>
+      <div>
+        <div class="stat-value">18</div>
+        <div class="stat-label">Weeks Dev</div>
+      </div>
     </div>
-</header>
-
-<div class="container">
-
-    <!-- NAV -->
-    <div class="nav-tabs">
-        <button class="active" onclick="showTab('overview')">📋 Overview</button>
-        <button onclick="showTab('flowchart')">🔀 Flowchart</button>
-        <button onclick="showTab('sequence')">📊 Sequence</button>
-        <button onclick="showTab('class')">🏗️ Class Diagram</button>
-        <button onclick="showTab('data')">🗄️ Data Model</button>
-        <button onclick="showTab('roadmap')">🛤️ Roadmap</button>
-        <button onclick="showTab('contracts')">📡 API Contracts</button>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;">
+      <a href="#overview" class="btn btn-primary" style="background:var(--text);color:var(--yellow-light);">
+        📋 View Blueprint
+      </a>
+      <a href="#contracts" class="btn btn-outline" style="border:1.5px solid var(--border);color:var(--text);text-decoration:none;padding:12px 24px;border-radius:50px;font-size:13px;font-weight:600;transition:all 0.2s;">
+        📡 API Contracts
+      </a>
     </div>
+  </div>
+</div>
 
-    <!-- ============================================================
-         TAB 1: OVERVIEW
-    ============================================================ -->
-    <div class="section active" id="tab-overview">
+<!-- ══════════════════════════════════════════════════════
+     SECTION 1: OVERVIEW
+══════════════════════════════════════════════════════ -->
+<section id="overview">
+  <div class="section-header reveal-heading">
+    <div class="section-tag">01 · Project Overview</div>
+    <h2 class="section-title">What is the TnP System?</h2>
+    <p class="section-sub">A digital employee management system to replace GDT's manual paper-based workflow — covering records, payroll, performance reviews, and leave management.</p>
+  </div>
 
-        <div class="card">
-            <div class="card-title">
-                <span class="card-tag">01</span>
-                Project Overview & Scope
-            </div>
-            <p>The General Department of Taxation (GDT) of Cambodia is modernizing its employee management system, currently using a manual paper-based workflow, by developing a digital system called <strong>TnP (Taxation a
+  <div class="grid-2" style="margin-bottom:32px;">
 
-nd Payroll)</strong> to manage employee records, salary, and performance evaluation across department heads, HR, and system administrators.</p>
-            <br>
-            <p class="text-muted"><strong>Goal:</strong> Replace paper-based workflows with a structured digital system that supports role-based access control and payroll processing.</p>
-            <div style="margin-top:1rem;">
-                <span class="tag">Role-Based Access</span>
-                <span class="tag">Performance Review</span>
-                <span class="tag">Salary Processing</span>
-                <span class="tag">GDT Internal Use</span>
-            </div>
-        </div>
-
-        <div class="card">
-            <div class="card-title">
-                <span class="card-tag">02</span>
-                Functional Requirements
-            </div>
-            <ul>
-                <li><strong>Employee Record Management:</strong> Create/Edit/Delete/View employee records with unique ID, name, DOB, department, position, hire date, status and salary information.</li>
-                <li><strong>Department Management:</strong> CRUD operations for departments (Dept ID, name, description, head).</li>
-                <li><strong>Position Management:</strong> CRUD for positions (Position ID, title, level, salary scale).</li>
-                <li><strong>Performance Review:</strong> Annual review cycle, KPI scoring, promotion recommendations. State management: Draft → Submitted → Reviewed → Final.</li>
-                <li><strong>Payroll Processing:</strong> Monthly payroll records: employee, salary, allowances, deductions, net pay. Gross = Base + Allowances − Deductions.</li>
-                <li><strong>Leave Management:</strong> Leave request workflow: Pending → Approved / Rejected. Paid leave quota per employee.</li>
-                <li><strong>Audit Trail:</strong> System logs all C
-
-UD operations on employee records with old/new values, actor, timestamp.</li>
-                <li><strong>Search & Filter:</strong> Search employees by name, dept, position. Filter by status, department, date range.</li>
-                <li><strong>Dashboard:</strong> Summary widgets: total employees, department counts, payroll totals, pending leave requests.</li>
-                <li><strong>Authentication:</strong> System login with role assignment. Roles: Admin, Manager, HR, Employee.</li>
-            </ul>
-        </div>
-
-        <div class="card">
-            <div class="card-title">
-                <span class="card-tag">03</span>
-                User Roles & Actors
-                </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Role</th>
-                        <th>Responsibilities</th>
-                        <th>Access Level</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr><td><strong>Admin</strong></td><td>Full system access; manage users, employees, departments, positions</td><td>All modules</td></tr>
-                    <tr><td><strong>HR</strong></td><td>Manage employee records, payroll, leave requests</td><td>HR + Payroll modules</td></tr>
-                    <tr><td><strong>Manager</strong></td><td>Review employee performance, approve leave</td><td>Performance + Leave</td></tr>
-                    <tr><td><strong>Employee</strong></td><td>View own record, submit leave, view payslips</td><td>Self Service Portal</td></tr>
-                </tbody>
-            </table>
-        </div>
-
-        <div class="card">
-            <div class="card-title">
-                <span class="card-tag">04</span>
-                Technical Stack (Proposed)
-            </div>
-            <ul>
-                <li><strong>Frontend:</strong> React.js (SPA) or Thymeleaf (server-side rendered)</li>
-                <li><strong>Backend:</strong> Java Spring Boot with MVC architecture</li>
-                <li><strong>Database:</strong> PostgreSQL (primary data store) + Redis (caching)</li>
-                <li><strong>Security:</strong> Spring Security with role-based access control</li>
-                <li><strong>API:</strong> RESTful JSON API</li>
-                <li><strong>Documentation
-
-:</strong> Swagger/OpenAPI</li>
-            </ul>
-        </div>
-
+    <div class="card">
+      <div class="card-title"><span class="card-tag">Scope</span>Project Goal</div>
+      <p class="text-muted" style="font-size:13px;line-height:1.75;">
+        The General Department of Taxation (GDT) of Cambodia is modernizing its employee management system by developing a digital system called <strong class="text-strong">TnP (Taxation and Payroll)</strong> to manage employee records, salary, and performance evaluation across department heads, HR, and system administrators.
+      </p>
+      <div style="margin-top:14px;display:flex;flex-wrap:wrap;">
+        <span class="tag tag-green">Role-Based Access</span>
+        <span class="tag tag-green">Performance Review</span>
+        <span class="tag tag-green">Leave Management</span>
+        <span class="tag">Audit Trail</span>
+        <span class="tag">GDT Internal</span>
+      </div>
     </div>
 
-    <!-- ============================================================
-         TAB 2: FLOWCHART
-    ============================================================ -->
-    <div class="section" id="tab-flowchart">
-        <div class="card">
-            <div class="card-title">
-                <span class="card-tag">05</span>
-                System Flowchart
-            </div>
-            <div class="diagram-wrap">
-                <img src="https://raw.githubusercontent.com/rockyvongusa-max/gdt-blueprint/master/images/gdt-flowchart.png"
-                     alt="GDT System Flowchart"
-                     onerror="this.style.display='none';document.getElementById('fallback-flowchart').style.display='block';">
-                <p class="text-muted" style="margin-top:0.5rem;">⭐ GDT TnP Workflow — Employee Management Flow</p>
-            </div>
-            <div id="fallback-flowchart" style="display:none;">
-                <p class="text-muted">Flowchart image unavailable. Refer to the sequence and class diagrams for system behavior.</p>
-            </div>
-        </div>
+    <div class="card">
+      <div class="card-title"><span class="card-tag">Stack</span>Technical Stack</div>
+      <ul style="list-style:none;padding:0;margin-top:6px;">
+        <li style="font-size:13px;padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
+          <span class="text-muted">Frontend</span><strong class="text-strong">React.js / Thymeleaf</strong>
+        </li>
+        <li style="font-size:13px;padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
+          <span class="text-muted">Backend</span><strong class="text-strong">Java Spring Boot (MVC)</strong>
+        </li>
+        <li style="font-size:13px;padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
+          <span class="text-muted">Database</span><strong class="text-strong">PostgreSQL + Redis</strong>
+        </li>
+        <li style="font-size:13px;padding:8px 0;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;">
+          <span class="text-muted">Security</span><strong class="text-strong">Spring Security / JWT</strong>
+        </li>
+        <li style="font-size:13px;padding:8px 0;display:flex;justify-content:space-between;">
+          <span class="text-muted">API Docs</span><strong class="text-strong">Swagger / OpenAPI</strong>
+        </li>
+      </ul>
     </div>
 
-    <!-- ============================================================
-         TAB 3: SEQUENCE
-    ============================================================ -->
-    <div class="section" id
+  </div>
 
-="tab-sequence">
-        <div class="card">
-            <div class="card-title">
-                <span class="card-tag">06</span>
-                Sequence Diagram
-            </div>
-            <div class="diagram-wrap">
-                <img src="https://raw.githubusercontent.com/rockyvongusa-max/gdt-blueprint/master/images/gdt-sequence.png"
-                     alt="GDT Sequence Diagram"
-                     onerror="this.style.display='none';document.getElementById('fallback-sequence').style.display='block';">
-                <p class="text-muted" style="margin-top:0.5rem;">Key interaction sequences between actors and system components</p>
-            </div>
-        </div>
+  <!-- Functional Requirements -->
+  <div class="card" style="margin-top:0;">
+    <div class="card-title"><span class="card-tag">02</span>Functional Requirements</div>
+    <div class="grid-2">
+      <div>
+        <ul style="padding-left:1.4rem;">
+          <li style="font-size:13px;margin-bottom:10px;"><strong class="text-strong">Employee Record Management:</strong> <span class="text-muted">CRUD with unique ID, name, DOB, department, position, hire date, status, salary.</span></li>
+          <li style="font-size:13px;margin-bottom:10px;"><strong class="text-strong">Department Management:</strong> <span class="text-muted">CRUD for departments (Dept ID, name, description, head).</span></li>
+          <li style="font-size:13px;margin-bottom:10px;"><strong class="text-strong">Position Management:</strong> <span class="text-muted">CRUD for positions (Position ID, title, level, salary scale).</span></li>
+          <li style="font-size:13px;margin-bottom:10px;"><strong class="text-strong">Performance Review:</strong> <span class="text-muted">Annual cycle, KPI scoring, promotion recommendations. State: Draft → Submitted → Reviewed → Final.</span></li>
+        </ul>
+      </div>
+      <div>
+        <ul style="padding-left:1.4rem;">
+          <li style="font-size:13px;margin-bottom:10px;"><strong class="text-strong">Payroll Processing:</strong> <span class="text-muted">Monthly payroll: Gross = Base + Allowances − Deductions = Net Pay.</span></li>
+          <li style="font-size:13px;margin-bottom:10px;"><strong class="text-strong">Leave Management:</strong> <span class="text-muted">Workflow: Pending → Approved / Rejected. Paid leave quota per employee.</span></li>
+          <li style="font-size:13px;margin-bottom:10px;"><strong class="text-strong">Audit Trail:</strong> <span class="text-muted">Logs all CUD operations with old/new values, actor, timestamp.</span></li>
+          <li style="font-size:13px;margin-bottom:10px;"><strong class="text-strong">Search & Filter:</strong> <span class="text-muted">By name, department, position. Filter by status, date range.</span></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Roles Table -->
+  <div class="card" style="margin-top:16px;">
+    <div class="card-title"><span class="card-tag">03</span>User Roles & Actors</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Responsibilities</th>
+          <th>Access Level</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong class="text-strong">Admin</strong></td>
+          <td>Full system access; manage users, employees, departments, positions</td>
+          <td>All modules</td>
+        </tr>
+        <tr>
+          <td><strong class="text-strong">HR</strong></td>
+          <td>Manage employee records, payroll, leave requests</td>
+          <td>HR + Payroll modules</td>
+        </tr>
+        <tr>
+          <td><strong class="text-strong">Manager</strong></td>
+          <td>Review RFC performance, approve leave</td>
+          <td>Performance + Leave</td>
+        </tr>
+        <tr>
+          <td><strong class="text-strong">Employee</strong></td>
+          <td>View own record, submit leave, view payslips</td>
+          <td>Self Service Portal</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 2: FLOWCHART
+══════════════════════════════════════════════════════ -->
+<section id="flowchart">
+  <div class="section-header reveal-heading">
+    <div class="section-tag">02 · System Flowchart</div>
+    <h2 class="section-title">TnP Workflow</h2>
+    <p class="section-sub">High-level employee management flow from request to audit.</p>
+  </div>
+  <div class="card">
+    <div class="diagram-wrap">
+      <img src="https://raw.githubusercontent.com/rockyvongusa-max/gdt-blueprint/master/images/gdt-flowchart.png"
+           alt="GDT TnP System Flowchart"
+           onerror="this.style.display='none';document.getElementById('err-flowchart').style.display='block';">
+      <p class="diagram-caption" id="err-flowchart" style="display:none;">⚠️ Image unavailable — check GitHub raw URL.</p>
+      <p class="diagram-caption">⬆ GDT TnP Employee Management Workflow</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 3: SEQUENCE
+══════════════════════════════════════════════════════ -->
+<section id="sequence">
+  <div class="section-header reveal-heading">
+    <div class="section-tag">03 · Sequence Diagram</div>
+    <h2 class="section-title">Interaction Sequences</h2>
+    <p class="section-sub">Key interactions between actors and system components.</p>
+  </div>
+  <div class="card">
+    <div class="diagram-wrap">
+      <img src="https://raw.githubusercontent.com/rockyvongusa-max/gdt-blueprint/master/images/gdt-sequence.png"
+           alt="GDT TnP Sequence Diagram"
+           onerror="this.style.display='none';document.getElementById('err-sequence').style.display='block';">
+      <p class="diagram-caption" id="err-sequence" style="display:none;">⚠️ Image unavailable — check GitHub raw URL.</p>
+      <p class="diagram-caption">⬆ Actor → System interaction sequences</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 4: CLASS DIAGRAM
+══════════════════════════════════════════════════════ -->
+<section id="classdiagram">
+  <div class="section-header reveal-heading">
+    <div class="section-tag">04 · Class Diagram</div>
+    <h2 class="section-title">Domain Model</h2>
+    <p class="section-sub">Entity relationships and data structure.</p>
+  </div>
+  <div class="card">
+    <div class="diagram-wrap">
+      <img src="https://raw.githubusercontent.com/rockyvongusa-max/gdt-blueprint/master/images/gdt-class.png"
+           alt="GDT TnP Class Diagram"
+           onerror="this.style.display='none';document.getElementById('err-class').style.display='block';">
+      <p class="diagram-caption" id="err-class" style="display:none;">⚠️ Image unavailable — check GitHub raw URL.</p>
+      <p class="diagram-caption">⬆ Core entities and their relationships</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 5: DATA MODEL
+══════════════════════════════════════════════════════ -->
+<section id="datamodel">
+  <div class="section-header reveal-heading">
+    <div class="section-tag">05 · Data Model</div>
+    <h2 class="section-title">Database Schemas</h2>
+    <p class="section-sub">Core entities: Employee, Department, Position, Payroll, LeaveRequest, PerformanceReview.</p>
+  </div>
+  <div class="grid-2">
+
+    <div class="card">
+      <div class="card-title"><span class="card-tag">Employee</span></div>
+      <table>
+        <tbody>
+          <tr><td><strong>employee_id</strong></td><td>UUID · PK</td></tr>
+          <tr><td><strong>full_name</strong></td><td>VARCHAR(255)</td></tr>
+          <tr><td><strong>date_of_birth</strong></td><td>DATE</td></tr>
+          <tr><td><strong>department_id</strong></td><td>UUID · FK</td></tr>
+          <tr><td><strong>position_id</strong></td><td>UUID · FK</td></tr>
+          <tr><td><strong>hire_date</strong></td><td>DATE</td></tr>
+          <tr><td><strong>status</strong></td><td>ENUM('ACTIVE','INACTIVE','TERMINATED')</td></tr>
+          <tr><td><strong>base_salary</strong></td><td>DECIMAL(12,2)</td></tr>
+          <tr><td><strong>manager_id</strong></td><td>UUID · FK → Employee</td></tr>
+          <tr><td><strong>created_at</strong></td><td>TIMESTAMP</td></tr>
+          <tr><td><strong>updated_at</strong></td><td>TIMESTAMP</td></tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- ============================================================
-         TAB 4: CLASS
-    ============================================================ -->
-    <div class="section" id="tab-class">
-        <div class="card">
-            <div class="card-title">
-                <span class="card-tag">07</span>
-                Class Diagram
-            </div>
-            <div class="diagram-wrap">
-                <img src="https://raw.githubusercontent.com/rockyvongusa-max/gdt-blueprint/master/images/gdt-class.png"
-                     alt="GDT Class Diagram"
-                     onerror="this.style.display='none';document.getElementById('fallback-class').style.display='block';">
-                <p class="text-muted" style="margin-top:0.5rem;">Domain model and entity relationships</p>
-            </div>
-        </div>
+    <div class="card">
+      <div class="card-title"><span class="card-tag">Department</span></div>
+      <table>
+        <tbody>
+          <tr><td><strong>department_id</strong></td><td>UUID · PK</td></tr>
+          <tr><td><strong>name</strong></td><td>VARCHAR(100)</td></tr>
+          <tr><td><strong>description</strong></td><td>TEXT</td></tr>
+          <tr><td><strong>head_id</strong></td><td>UUID · FK → Employee</td></tr>
+          <tr><td><strong>created_at</strong></td><td>TIMESTAMP</td></tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- ============================================================
-         TAB 5: DATA MODEL
-    ============================================================ -->
-    <div class="section"
-
- id="tab-data">
-        <div class="card">
-            <div class="card-title">
-                <span class="card-tag">08</span>
-                Data Models
-            </div>
-
-            <table>
-                <thead>
-                    <tr><th colspan="2">Employee</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>employee_id</td><td>UUID · PK</td></tr>
-                    <tr><td>full_name</td><td>VARCHAR(255)</td></tr>
-                    <tr><td>date_of_birth</td><td>DATE</td></tr>
-                    <tr><td>department_id</td><td>UUID · FK</td></tr>
-                    <tr><td>position_id</td><td>UUID · FK</td></tr>
-                    <tr><td>hire_date</td><td>DATE</td></tr>
-                    <tr><td>status</td><td>ENUM('ACTIVE','INACTIVE','TERMINATED')</td></tr>
-                    <tr><td>base_salary</td><td>DECIMAL(12,2)</td></tr>
-                    <tr><td>manager_id</td><td>UUID · FK → Employee</td></tr>
-                    <tr><td>created_at</td><td>TIMESTAMP</td></tr>
-                    <tr><td>updated_at</td><td>TIMESTAMP</td></tr>
-                </tbody>
-            </table>
-
-            <table>
-                <thead>
-                    <tr><th colspan="2">Department</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>department_id</td><td>UUID · PK</td></tr>
-                    <tr><td>name</td><td>VARCHAR(100)</td></tr>
-                    <tr><td>description</td><td>TEXT</td></tr>
-                    <tr><td>head_id</td><td>UUID · FK → Employee</td></tr>
-                    <tr><td>created_at</td><td>TIMESTAMP</td></tr>
-                </tbody>
-            </table>
-
-            <table>
-                <thead>
-                    <tr><th colspan="2">Position</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>position_id</td><td>UUID · PK</td></tr>
-                    <tr><td>title</td><td>VARCHAR(100)</td></tr>
-                    <tr><td>level</td><td>INT</td></tr>
-                    <tr><td>salary_scale_min</td><td>DECIMAL(12,2)</td></tr>
-                    <tr><td>salary_scale_max</td><td>DECIMAL(12,2)</td></tr>
-                </tbody>
-            </table>
-
-            <table>
-                <thead>
-                    <tr><th colspan="2">PerformanceReview</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>review_id</td><td>UUID · PK</td></tr>
-                    <tr><td>employee_id</td><td>UUID · FK</td></tr>
-                    <tr><td>review_date</td><td>DATE</td></tr>
-                    <tr><td>kpi_score</td><td>DECIMAL(5,2)</td></tr>
-                    <tr><td>comments</td><td>TEXT</td></tr>
-                    <tr><td>status</td><td>ENUM('DRAFT','SUBMITTED','REVIEWED','FINAL')</td></tr>
-                    <tr><td>reviewer_id</td><td>UUID · FK → Employee</td></tr>
-                </tbody>
-            </table>
-
-            <table>
-                <thead>
-                    <tr><th colspan="2">Payroll</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>payroll_id</td><td>UUID · PK</td></tr>
-                    <tr><td>employee_id</td><td>UUID · FK</td></tr>
-                    <tr><td>payroll_date</td><td>DATE</td></tr>
-                    <tr><td>base_salary</td><td>DECIMAL(12,2)</td></tr>
-                    <tr><td>total_allowances</td><td>DECIMAL(12,2)</td></tr>
-                    <tr><td>total_deductions</td><td>DECIMAL(12,2)</td></tr>
-                    <tr><td>net_pay</td><td>DECIMAL(12,2)</td></tr>
-                    <tr><td>status</td><td>VARCHAR(20)</td></tr>
-                </tbody>
-            </table>
-
-            <table>
-                <thead>
-                    <tr><th colspan="2">LeaveRequest</th></tr>
-                </thead>
-                <tbody>
-                    <tr><td>leave_id</td><td>UUID · PK</td></tr>
-                    <tr><td>employee_id</td><td>UUID · FK</td></tr>
-                    <tr><td>leave_type</td><td>VARCHAR(50)</td></tr>
-                    <tr><td>start_date</td><td>DATE</td></tr>
-                    <tr><td>end_date</td><td>DATE</td></tr>
-                    <tr><td>status</td><td>ENUM('PENDING','APPROVED','REJECTED')</td></tr>
-                    <tr><td>approved_by</td><td>UUID · FK → Employee</td></tr>
-                    <tr><td>created_at</td><td>TIMESTAMP</td></tr>
-                </tbody>
-            </table>
-
-        </div>
+    <div class="card">
+      <div class="card-title"><span class="card-tag">Position</span></div>
+      <table>
+        <tbody>
+          <tr><td><strong>position_id</strong></td><td>UUID · PK</td></tr>
+          <tr><td><strong>title</strong></td><td>VARCHAR(100)</td></tr>
+          <tr><td><strong>level</strong></td><td>INT</td></tr>
+          <tr><td><strong>salary_scale_min</strong></td><td>DECIMAL(12,2)</td></tr>
+          <tr><td><strong>salary_scale_max</strong></td><td>DECIMAL(12,2)</td></tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- ============================================================
-         TAB 6: ROADMAP
-    ============================================================ -->
-    <div class="section" id="tab-roadmap">
-        <div class="card">
-            <div class="card-title">
-                <span class="card-tag">09</span>
-                Developer Roadmap
-            </div>
-
-            <div class="phase">
-                <div class="phase-num">Phase 1 · Weeks 1–3</div>
-                <div class="phase-title">Foundation & Database Setup</div>
-                <div class="phase-desc">
-                    Initialize Spring Boot project > Configure PostgreSQL connection > Define JPA entities matching the data models > Run Flyway/Liquibase migrations > Verify schema generation.
-                </div>
-            </div>
-
-            <div class="phase">
-                <div class="phase-num">Phase 2 · Weeks 4–6</div>
-                <div class="phase-title">Core API Layer</div>
-                <div class="phase-desc">
-                    Implement CRUD REST controllers for Employee, Department, Position > Add Request/Response DTOs > Add input validation > Swagger documentation > Unit tests (JUnit + Mockito).
-                </div>
-            </div>
-
-            <div class="phase">
-                <div class="phase-num">Phase 3 · Weeks 7–9</div>
-                <div class="phase-title">Business Logic & Payroll</div>
-                <div class="phase-desc">
-                    Implement PayrollCalculationService > LeaveWorkflowService > PerformanceReviewWorkflowService > Calculate net_pay logic > Audit logging via AOP/observers.
-                </div>
-            </div>
-
-            <div class="phase">
-                <div class="phase
-
--num">Phase 4 · Weeks 10–12</div>
-                <div class="phase-title">Security & Auth</div>
-                <div class="phase-desc">
-                    Configure Spring Security with JWT > Role-based endpoint protection (Admin, HR, Manager, Employee) > Stateless session management > Password encryption with BCrypt.
-                </div>
-            </div>
-
-            <div class="phase">
-                <div class="phase-num">Phase 5 · Weeks 13–15</div>
-                <div class="phase-title">Frontend Integration</div>
-                <div class="phase-desc">
-                    Connect React SPA to REST API endpoints > Implement login flow > Build employee list/detail views > Add role-based UI rendering.
-                </div>
-            </div>
-
-            <div class="phase">
-                <div class="phase-num">Phase 6 · Weeks 16–18</div>
-                <div class="phase-title">Dashboard & Polish</div>
-                <div class="phase-desc">
-                    Summary widgets (total employees, payroll totals, pending leaves) > Advanced search & filter > Pagination > Error handling > Responsive layout.
-                </div>
-            </div>
-
-        </div>
+    <div class="card">
+      <div class="card-title"><span class="card-tag">PerformanceReview</span></div>
+      <table>
+        <tbody>
+          <tr><td><strong>review_id</strong></td><td>UUID · PK</td></tr>
+          <tr><td><strong>employee_id</strong></td><td>UUID · FK</td></tr>
+          <tr><td><strong>review_date</strong></td><td>DATE</td></tr>
+          <tr><td><strong>kpi_score</strong></td><td>DECIMAL(5,2)</td></tr>
+          <tr><td><strong>comments</strong></td><td>TEXT</td></tr>
+          <tr><td><strong>status</strong></td><td>ENUM('DRAFT','SUBMITTED','REVIEWED','FINAL')</td></tr>
+          <tr><td><strong>reviewer_id</strong></td><td>UUID · FK → Employee</td></tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- ============================================================
-         TAB 7: API CONTRACTS
-    ============================================================ -->
-    <div class="section" id="tab-contracts">
-        <div class="card">
-            <div class="card-title">
-                <span class="card-tag">10</span>
-                REST API Contracts
-            </div>
+    <div class="card">
+      <div class="card-title"><span class="card-tag">Payroll</span></div>
+      <table>
+        <tbody>
+          <tr><td><strong>payroll_id</strong></td><td>UUID · PK</td></tr>
+          <tr><td><strong>employee_id</strong></td><td>UUID · FK</td></tr>
+          <tr><td><strong>payroll_date</strong></td><td>DATE</td></tr>
+          <tr><td><strong>base_salary</strong></td><td>DECIMAL(12,2)</td></tr>
+          <tr><td><strong>total_allowances</strong></td><td>DECIMAL(12,2)</td></tr>
+          <tr><td><strong>total_deductions</strong></td><td>DECIMAL(12,2)</td></tr>
+          <tr><td><strong>net_pay</strong></td><td>DECIMAL(12,2)</td></tr>
+          <tr><td><strong>status</strong></td><td>VARCHAR(20)</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-            <p><strong>Base URL:</strong> <code>/api/v1</code></p>
+    <div class="card">
+      <div class="card-title"><span class="card-tag">LeaveRequest</span></div>
+      <table>
+        <tbody>
+          <tr><td><strong>leave_id</strong></td><td>UUID · PK</td></tr>
+          <tr><td><strong>employee_id</strong></td><td>UUID · FK</td></tr>
+          <tr><td><strong>leave_type</strong></td><td>VARCHAR(50)</td></tr>
+          <tr><td><strong>start_date</strong></td><td>DATE</td></tr>
+          <tr><td><strong>end_date</strong></td><td>DATE</td></tr>
+          <tr><td><strong>status</strong></td><td>ENUM('PENDING','APPROVED','REJECTED')</td></tr>
+          <tr><td><strong>approved_by</strong></td><td>UUID · FK → Employee</td></tr>
+          <tr><td><strong>created_at</strong></td><td>TIMESTAMP</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-            <pre>GET    /api/v1/employees         — List all employees (paginated, filterable)
-GET    /api/v1/employees/{id}      — Get employee by ID
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 6: ROADMAP
+══════════════════════════════════════════════════════ -->
+<section id="roadmap">
+  <div class="section-header reveal-heading">
+    <div class="section-tag">06 · Developer Roadmap</div>
+    <h2 class="section-title">Implementation Phases</h2>
+    <p class="section-sub">18-week phased rollout, 6 milestones.</p>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">Phase 1 · Weeks 1–3</div>
+    <div class="phase-title">Foundation & Database Setup</div>
+    <div class="phase-desc">Initialize Spring Boot project → Configure PostgreSQL connection → Define JPA entities matching the data models → Run Flyway/Liquibase migrations → Verify schema generation.</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">Phase 2 · Weeks 4–6</div>
+    <div class="phase-title">Core API Layer</div>
+    <div class="phase-desc">Implement CRUD REST controllers for Employee, Department, Position → Add Request/Response DTOs → Add input validation → Swagger documentation → Unit tests (JUnit + Mockito).</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">Phase 3 · Weeks 7–9</div>
+    <div class="phase-title">Business Logic & Payroll</div>
+    <div class="phase-desc">Implement PayrollCalculationService → LeaveWorkflowService → PerformanceReviewWorkflowService → Calculate net_pay logic → Audit logging via AOP/observers.</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">Phase 4 · Weeks 10–12</div>
+    <div class="phase-title">Security & Auth</div>
+    <div class="phase-desc">Configure Spring Security with JWT → Role-based endpoint protection (Admin, HR, Manager, Employee) → Stateless session → BCrypt password encryption.</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">Phase 5 · Weeks 13–15</div>
+    <div class="phase-title">Frontend Integration</div>
+    <div class="phase-desc">Connect React SPA to REST API endpoints → Implement login flow → Build employee list/detail views → Role-based UI rendering.</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">Phase 6 · Weeks 16–18</div>
+    <div class="phase-title">Dashboard & Polish</div>
+    <div class="phase-desc">Summary widgets (total employees, payroll totals, pending leaves) → Advanced search & filter → Pagination → Error handling → Responsive layout.</div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     SECTION 7: API CONTRACTS
+══════════════════════════════════════════════════════ -->
+<section id="contracts">
+  <div class="section-header reveal-heading">
+    <div class="section-tag">07 · API Contracts</div>
+    <h2 class="section-title">REST API Reference</h2>
+    <p class="section-sub">Base URL: <strong>/api/v1</strong> — Standard response wrapper, error codes.</p>
+  </div>
+
+  <div class="card" style="margin-bottom:16px;">
+    <div class="card-title"><span class="card-tag">Endpoints</span>REST Endpoints</div>
+    <pre>GET    /api/v1/employees          — List all employees (paginated, filterable)
+GET    /api/v1/employees/{id}       — Get employee by ID
 POST   /api/v1/employees           — Create employee
-PUT    /api/v1/employees/{id}       — Update employee
-DELETE /api/v1/employees/{id}       — Delete employee
+PUT    /api/v1/employees/{id}        — Update employee
+DELETE /api/v1/employees/{id}        — Delete employee
 
-GET    /api/v1/departments         — List departments
-POST   /api/v1/departments         — Create department
-GET    /api/v1/positions          — List positions
-POST   /api/v1/positions          — Create position
+GET    /api/v1/departments          — List departments
+POST   /api/v1/departments          — Create department
+GET    /api/v1/positions           — List positions
+POST   /api/v1/positions           — Create position
 
-GET    /api/v1/payroll/{empId}/{month}  — Get payroll for employee
-POST   /api/v1/payroll/generate         — Generate monthly payroll
-GET    /api/v1/payroll/report           — Payroll summary report
+GET    /api/v1/payroll/{empId}/{month}   — Get payroll for employee
+POST   /api/v1/payroll/generate          — Generate monthly payroll
+GET    /api/v1/payroll/report            — Payroll summary report
 
-GET    /api/v1/leave               — List leave requests
-POST   /api/v1/leave               — Submit leave request
+GET    /api/v1/leave              — List leave requests
+POST   /api/v1/leave              — Submit leave request
 PUT    /api/v1/leave/{id}/approve — Approve leave
-PUT    /api/v1/leave/{id}/reject   — Reject leave
+PUT    /api/v1/leave/{id}/reject  — Reject leave
 
-GET    /api/v1/reviews            — List performance reviews
-POST   /api/v1/reviews            — Create review
+GET    /api/v1/reviews             — List performance reviews
+POST   /api/v1/reviews             — Create review
 PUT    /api/v1/reviews/{id}/status — Update review status
 
-POST   /api/v1/auth/login         — Login { email, password }
-GET    /api/v1/auth/me            — Current user info
+POST   /api/v1/auth/login          — Login { email, password }
+GET    /api/v1/auth/me             — Current user info
 
 GET    /api/v1/dashboard          — Dashboard summary</pre>
+  </div>
 
-            <br>
-            <p style="font-size:0.88rem;"><strong>Standard Response Wrapper:</strong></p>
-            <pre>{
+  <div class="grid-2">
+    <div class="card">
+      <div class="card-title"><span class="card-tag">Success</span>Response Wrapper</div>
+      <pre>{
   "success": true,
   "data": { ... },
   "message": "Operation successful",
   "timestamp": "2025-12-01T08:00:00Z"
 }</pre>
+    </div>
+    <div class="card">
+      <div class="card-title"><span class="card-tag">Error</span>Error Response</div>
+      <pre>{
+  "success": false,
+  "error": {
+    "code": "EMPLOYEE_NOT_FOUND",
+    "message": "Employee with ID not found"
+  },
+  "timestamp": "2025-12-01T08:00:00Z"
+}</pre>
+    </div>
+  </div>
+</section>
 
-            <br>
-            <p style="font-size:0.88rem;"><strong>Error Response:</strong></p>
-            <pre>{
+<!-- ─── FOOTER ─────────────────────────────────────── -->
+<footer>
+  <span>GDT TnP Business Analysis & System Blueprint · Document DT202604231977</span>
+  <span>Generated by Hermes Business Analysis Agent</span>
+</footer>
+
+<script>
+// ─── MOBILE MENU ───────────────────────────────────────
+const mobileBtn = document.getElementById('mobileBtn');
+const mobileOverlay = document.getElementById('mobileOverlay');
+mobileBtn.addEventListener('click', () => {
+  mobileBtn.classList.toggle('open');
+  mobileOverlay.classList.toggle('open');
+});
+function closeMobile() {
+  mobileBtn.classList.remove('open');
+  mobileOverlay.classList.remove('open');
+}
+
+// ─── SCROLL PROGRESS ───────────────────────────────────
+window.addEventListener('scroll', () => {
+  const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+  const scrolled = (window.scrollY / scrollable) * 100;
+  document.getElementById('scrollProgress').style.width = scrolled + '%';
+});
+
+// ─── PARTICLES ─────────────────────────────────────────
+const particlesContainer = document.getElementById('particles');
+const particleData = [
+  { w: 6, h: 6, x: '15%', y: '25%', dur: '3.2s', delay: '0s' },
+  { w: 4, h: 4, x: '75%', y: '15%', dur: '4s', delay: '0.5s' },
+  { w: 8, h: 8, x: '55%', y: '60%', dur: '3.8s', delay: '1s' },
+  { w: 5, h: 5, x: '80%', y: '70%', dur: '4.5s', delay: '1.5s' },
+  { w: 3, h: 3, x: '25%', y: '75%', dur: '3.5s', delay: '0.8s', glow: true },
+  { w: 6, h: 6, x: '45%', y: '35%', dur: '5s', delay: '2s' },
+  { w: 4, h: 4, x: '65%', y: '80%', dur: '4s', delay: '1.2s', glow: true },
+];
+particleData.forEach(p => {
+  const el = document.createElement('div');
+  el.className = 'hero-particle' + (p.glow ? ' glow' : '');
+  el.style.cssText = `width:${p.w}px;height:${p.h}px;left:${p.x};top:${p.y};animation-duration:${p.durul li { margin-bottom: 0.4rem; }
+ul li::marker { color: var(--yellow); }
+  .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.8rem;
+    color: var(--text);
+  }
+  .card-sub {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+  }
+  .btn {
+    display: inline flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 50px;
+    font-size: 13px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+    letter-spacing: 0.02em;
+  }
+  .btn-primary {
+    background: var(--text);
+    color: var(--yellow-light);
+  }
+  .btn-primary:hover { background: var(--green); transform: translateY(-1px); }
+  .btn-outline {
+    background: transparent;
+    color: var(--text);
+    border: 1.5px solid var(--border);
+  }
+  .btn-outline:hover { border-color: var(--yellow); color: var(--yellow); }
+  .hero-particles { fixed: 0; inset: 0; pointer-events: none; overflow: hidden; border-radius: 20px; }
+  .hero-particle {
+    position: absolute;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(212,168,67,0.6) 0%, transparent 70%);
+    animation: particleFloat ease-in-out infinite;
+  }
+  .hero-particle.glow { background: radial-gradient(circle, rgba(61,107,79,0.6) 0%, transparent 70%); }
+  @keyframes particleFloat {
+    0%, 100% { transform: translateY(0) translateX(0) scale(1); opacity: 0.4; }
+    33% { transform: translateY(-22px) translateX(7px) scale(1.1); opacity: 0.7; }
+    66% { transform: translateY(-10px) translateX(-6px) scale(0.9); opacity: 0.5; }
+  }
+  .stagger-item {
+    opacity: 0;
+    transform: translateY(30px);
+    transition: opacity 0.6s cubic-bezier(0.16,1,0.3,1), transform 0.6s cubic-bezier(0.16,1,0.3,1);
+  }
+  .stagger-item.d_visible { opacity: 1; transform: translateY(0); }
+
+  /* ─── TIMELINE REVEAL ─────────────────────────── */
+  .timeline-item {
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: opacity 0.6s ease, transform 0.6s cubic-bezier(0.16,1,0.3,1);
+  }
+  .timeline-item.d_visible { opacity: 1; transform: translateX(0); }
+
+  li { font-size: 13px; margin-bottom: 8px; }
+  ul { padding-left: 1.4rem; margin-top: 0.5rem; }
+  ul li::marker { color: var(--yellow-dark); }
+
+  /* ─── RESPONSIVE ─────────────────────────────────── */
+  @media (max-width: 960px) {
+    nav { padding: 20px 32px; }
+    .nav-links { display: none; }
+    .nav-mobile-btn { display: flex; }
+    .hero {
+      grid-template-columns: 1fr;
+      padding: 100px 32px 60px;
+      gap: 48px;
+      text-align: center;
+    }
+    .hero-left { order: 2; }
+    .hero-right { order: 1; display: flex; flex-direction: column; align-items: center; }
+    .hero-eyebrow { justify-content: center; }
+    .hero-stats { justify-content: center; }
+    .hero-cta { justify-content: center; }
+    .photo-frame { width: 280px; height: 280px; }
+    .grid-2 { grid-template-columns: 1fr; }
+    section { padding: 80px 32px; }
+    .tabs-nav { top: 70px; }
+    footer { padding: 24px 32px; }
+    .contact-inner { grid-template-columns: 1fr !important; }
+  }
+  @media (max-width: 480px) {
+    .hero h1 { font-size: 36px; }
+    .hero-stats { gap: 24px; }
+    .section-title { font-size: 32px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="scroll-progress" id="scrollProgress"></div>
+
+<!-- ─── NAV ─────────────────────────────────────────── -->
+<nav>
+  <a href="#" class="nav-logo">
+    <span class="logo-gdt">GDT</span>
+    TnP Blueprint
+  </a>
+  <ul class="nav-links">
+    <li><a href="#overview" class="active" onclick="highlightNav(this)">Overview</a></li>
+    <li><a href="#flowchart" onclick="highlightNav(this)">Flowchart</a></li>
+    <li><a href="#sequence" onclick="highlightNav(this)">Sequence</a></li>
+    <li><a href="#class" onclick="highlightNav(this)">Class Diagram</a></li>
+    <li><a href="#datamodel" onclick="highlightNav(this)">Data Model</a></li>
+    <li><a href="#roadmap" onclick="highlightNav(this)">Roadmap</a></li>
+    <li><a href="#contracts" onclick="highlightNav(this)">API Contracts</a></li>
+  </ul>
+  <button class="nav-mobile-btn" id="mobileBtn" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<div class="nav-mobile-overlay" id="mobileOverlay">
+  <a href="#overview" onclick="closeMobile()">Overview</a>
+  <a href="#flowchart" onclick="closeMobile()">Flowchart</a>
+  <a href="#sequence" onclick="closeMobile()">Sequence</a>
+  <a href="#class" onclick="closeMobile()">Class Diagram</a>
+  <a href="#datamodel" onclick="closeMobile()">Data Model</a>
+  <a href="#roadmap" onclick="closeMobile()">Roadmap</a>
+  <a href="#contracts" onclick="closeMobile()">API Contracts</a>
+</div>
+
+<!-- ─── HERO ─────────────────────────────────────────── -->
+<section class="hero" id="hero">
+  <div class="hero-particles" id="particles"></div>
+  <div class="hero-left">
+
+    <div class="hero-eyebrow">
+      Business Analysis Agent · Hermes
+    </div>
+
+    <h1>
+      GDT TnP System
+      <span class="khmer-name">Business Analysis & System Blueprint</span>
+    </h1>
+
+    <p class="hero-role">
+      Technical requirements for the <strong>General Department of Taxation Cambodia</strong> — TnP (Taxation & Payroll) Employee Management System. Project ID: <strong>DT202604231977 · Dec 2025</strong>
+    </p>
+
+    <div class="hero-stats">
+      <div>
+        <div class="stat-value">7</div>
+        <div class="stat-label">Modules</div>
+      </div>
+      <div>
+        <div class="stat-value">6</div>
+        <div class="stat-label">Entities</div>
+      </div>
+      <div>
+        <div class="stat-value">4</div>
+        <div class="stat-label">User Roles</div>
+      </div>
+      <div>
+        <div class="stat-value">18</div>
+        <div class="stat-label">Weeks Dev</div>
+      </div>
+    </div>
+
+    <p class="hero-bio">
+      This blueprint covers the functional requirements, system flow, data models, implementation phases, and API contracts for the GDT TnP employee management system.
+    </p>
+
+    <div class="hero-cta">
+      <a href="#overview" class="btn btn-primary">
+        📋 View Blueprint
+      </a>
+      <a href="#contracts" class="btn btn-outline">
+        📡 API Contracts
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── SECTION: OVERVIEW ─────────────────────────────── -->
+<section id="overview">
+  <div class="section-header">
+    <div class="section-tag">01 · Project Overview</div>
+    <h2 class="section-title">What is the TnP System?</h2>
+    <p class="section-sub">A digital employee management system to replace GDT's manual paper-based workflow — covering records, payroll, performance reviews, and leave management.</p>
+  </div>
+
+  <div class="grid-2" style="margin-bottom: 32px;">
+    <div class="card stagger-item">
+      <div class="card-title">🎯 Project Scope</div>
+      <p class="text-muted">
+        The General Department of Taxation (GDT) of Cambodia is modernizing its employee management system by developing a digital system called <strong>TnP (Taxation and Payroll)</strong> to manage employee records, salary, and performance evaluation across department heads, HR, and system administrators.
+      </p>
+      <div style="margin-top: 14px;">
+        <span class="tag">Role-Based Access</span>
+        <span class="tag">Performance Review</span>
+        <span class="tag tag-green">Leave Management</span>
+        <span class="tag">Audit Trail</span>
+        <span class="tag tag-green">GDT Internal</span>
+      </div>
+    </div>
+
+    <div class="card stagger-item">
+      <div class="card-title">🛠️ Proposed Tech Stack</div>
+      <ul>
+        <li><strong>Frontend:</strong> React.js (SPA) or Thymeleaf (server-side rendered)</li>
+        <li><strong>Backend:</strong> Java Spring Boot with MVC architecture</li>
+        <li><strong>Database:</strong> PostgreSQL (primary) + Redis (caching)</li>
+        <li><strong>Security:</strong> Spring Security with role-based access control + JWT</li>
+        <li><strong>API:</strong> RESTful JSON API — Swagger/OpenAPI documentation</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card stagger-item">
+    <div class="card-title">📋 Functional Requirements</div>
+    <div class="grid-2">
+      <ul>
+        <li><strong>Employee Record Management:</strong> Create/Edit/Delete/View employee records with unique ID, name, DOB, department, position, hire date, status and salary information.</li>
+        <li><strong>Department Management:</strong> CRUD operations for departments (Dept ID, name, description, head).</li>
+        <li><strong>Position Management:</strong> CRUD for positions (Position ID, title, level, salary scale).</li>
+        <li><strong>Performance Review:</strong> Annual review cycle, KPI scoring, promotion recommendations. State management: Draft → Submitted → Reviewed → Final.</li>
+      </ul>
+      <ul>
+        <li><strong>Payroll Processing:</strong> Monthly payroll records: employee, salary, allowances, deductions, net pay. Gross = Base + Allowances − Deductions.</li>
+        <li><strong>Leave Management:</strong> Leave request workflow: Pending → Approved / Rejected. Paid leave quota per employee.</li>
+        <li><strong>Audit Trail:</strong> System logs all CUD operations on employee records with old/new values, actor, timestamp.</li>
+        <li><strong>Search & Filter:</strong> Search employees by name, dept, position. Filter by status, department, date range.</li>
+        <li><strong>Dashboard:</strong> Summary widgets: total employees, department counts, payroll totals, pending leave requests.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card stagger-item" style="margin-top: 16px;">
+    <div class="card-title">👥 User Roles</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Role</th>
+          <th>Responsibilities</th>
+          <th>Access Level</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>Admin</strong></td><td>Full system access; manage users, employees, departments, positions</td><td>All modules</td></tr>
+        <tr><td><strong>HR</strong></td><td>Manage employee records, payroll, leave requests</td><td>HR + Payroll modules</td></tr>
+        <tr><td><strong>Manager</strong></td><td>Review employee performance, approve leave</td><td>Performance + Leave</td></tr>
+        <tr><td><strong>Employee</strong></td><td>View own record, submit leave, view payslips</td><td>Self Service Portal</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ─── SECTION: FLOWCHART ─────────────────────────────── -->
+<section id="flowchart">
+  <div class="section-header">
+    <div class="section-tag">02 · System Flowchart</div>
+    <h2 class="section-title">TnP Workflow</h2>
+    <p class="section-sub">High-level employee management flow from request to audit.</p>
+  </div>
+  <div class="card stagger-item">
+    <div class="diagram-wrap">
+      <img src="https://raw.githubusercontent.com/rockyvongusa-max/gdt-blueprint/master/images/gdt-flowchart.png"
+           alt="GDT TnP System Flowchart"
+           onerror="this.style.display='none';document.getElementById('err-flowchart').style.display='block';">
+      <p class="diagram-caption" id="err-flowchart" style="display:none;">⚠️ Image unavailable — check GitHub raw URL.</p>
+      <p class="diagram-caption">⬆ GDT TnP Employee Management Workflow</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION: SEQUENCE ─────────────────────────────── -->
+<section id="sequence">
+  <div class="section-header">
+    <div class="section-tag">03 · Sequence Diagram</div>
+    <h2 class="section-title">Interaction Sequences</h2>
+    <p class="section-sub">Key interactions between actors and system components.</p>
+  </div>
+  <div class="card stagger-item">
+    <div class="diagram-wrap">
+      <img src="https://raw.githubusercontent.com/rockyvongusa-max/gdt-blueprint/master/images/gdt-sequence.png"
+           alt="GDT TnP Sequence Diagram"
+           onerror="this.style.display='none';document.getElementById('err-sequence').style.display='block';">
+      <p class="diagram-caption" id="err-sequence" style="display:none;">⚠️ Image unavailable — check GitHub raw URL.</p>
+      <p class="diagram-caption">⬆ Actor → System interaction sequences</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION: CLASS ───────────────────────────────── -->
+<section id="class">
+  <div class="section-header">
+    <div class="section-tag">04 · Class Diagram</div>
+    <h2 class="section-title">Domain Model</h2>
+    <p class="section-sub">Entity relationships and data structure.</p>
+  </div>
+  <div class="card stagger-item">
+    <div class="diagram-wrap">
+      <img src="https://raw.githubusercontent.com/rockyvongusa-max/gdt-blueprint/master/images/gdt-class.png"
+           alt="GDT TnP Class Diagram"
+           onerror="this.style.display='none';document.getElementById('err-class').style.display='block';">
+      <p class="diagram-caption" id="err-class" style="display:none;">⚠️ Image unavailable — check GitHub raw URL.</p>
+      <p class="diagram-caption">⬆ Core entities and their relationships</p>
+    </div>
+  </div>
+</section>
+
+<!-- ─── SECTION: DATA MODEL ───────────────────────────── -->
+<section id="datamodel">
+  <div class="section-header">
+    <div class="section-tag">05 · Data Model</div>
+    <h2 class="section-title">Database Schemas</h2>
+    <p class="section-sub">Core entities — Employee, Department, Position, Payroll, LeaveRequest, PerformanceReview.</p>
+  </div>
+  <div class="grid-2">
+
+    <div class="card stagger-item">
+      <div class="card-title"><span class="card-tag">Employee</span></div>
+      <table>
+        <tbody>
+          <tr><td><strong>employee_id</strong></td><td>UUID · PK</td></tr>
+          <tr><td><strong>full_name</strong></td><td>VARCHAR(255)</td></tr>
+          <tr><td><strong>date_of_birth</strong></td><td>DATE</td></tr>
+          <tr><td><strong>department_id</strong></td><td>UUID · FK</td></tr>
+          <tr><td><strong>position_id</strong></td><td>UUID · FK</td></tr>
+          <tr><td><strong>hire_date</strong></td><td>DATE</td></tr>
+          <tr><td><strong>status</strong></td><td>ENUM('ACTIVE','INACTIVE','TERMINATED')</td></tr>
+          <tr><td><strong>base_salary</strong></td><td>DECIMAL(12,2)</td></tr>
+          <tr><td><strong>manager_id</strong></td><td>UUID · FK → Employee</td></tr>
+          <tr><td><strong>created_at / updated_at</strong></td><td>TIMESTAMP</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card stagger-item">
+      <div class="card-title"><span class="card-tag">Department</span></div>
+      <table>
+        <tbody>
+          <tr><td><strong>department_id</strong></td><td>UUID · PK</td></tr>
+          <tr><td><strong>name</strong></td><td>VARCHAR(100)</td></tr>
+          <tr><td><strong>description</strong></td><td>TEXT</td></tr>
+          <tr><td><strong>head_id</strong></td><td>UUID · FK → Employee</td></tr>
+          <tr><td><strong>created_at</strong></td><td>TIMESTAMP</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card stagger-item">
+      <div class="card-title"><span class="card-tag">Position</span></div>
+      <table>
+        <tbody>
+          <tr><td><strong>position_id</strong></td><td>UUID · PK</td></tr>
+          <tr><td><strong>title</strong></td><td>VARCHAR(100)</td></tr>
+          <tr><td><strong>level</strong></td><td>INT</td></tr>
+          <tr><td><strong>salary_scale_min / max</strong></td><td>DECIMAL(12,2)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card stagger-item">
+      <div class="card-title"><span class="card-tag">PerformanceReview</span></div>
+      <table>
+        <tbody)
+          <tr><td><strong>review_id</strong></td><td>UUID · PK</td></tr>
+          <tr><td><strong>employee_id</strong></td><td>UUID · FK</td></tr>
+          <tr><td><strong>review_date</strong></td><td>DATE</td></tr>
+          <tr><td><strong>kpi_score</strong></td><td>DECIMAL(5,2)</td></tr>
+          <tr><td><strong>comments</strong></td><td>TEXT</td></tr>
+          <tr><td><strong>status</strong></td><td>ENUM('DRAFT','SUBMITTED','REVIEWED','FINAL')</td></tr>
+          <tr><td><strong>reviewer_id</strong></td><td>UUID · FK → Employee</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card stagger-item">
+      <div class="card-title"><span class="card-tag">Payroll</span></div>
+      <table>
+        <tbody>
+          <tr><td><strong>payroll_id</strong></td><td>UUID · PK</td></tr>
+          <tr><td><strong>employee_id</strong></td><td>UUID · FK</td></tr>
+          <tr><td><strong>payroll_date</strong></td><td>DATE</td></tr)
+          <tr><td><strong>base_salary</strong></td><td>DECIMAL(12, 2)</td></tr>
+          <tr><td><strong>total_allowances</strong></td><td>DECIMAL(12,2)</td></tr>
+          <tr><td><strong>total_deductions</strong></td><td>DECIMAL(12,2)</td></tr>
+          <tr><td><strong>net_pay</strong></td><td>DECIMAL(12,2)</td></tr>
+          <tr><td><strong>status</strong></td><td>VARCHAR(20)</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="card stagger-item">
+      <div class="card-title"><span class="card-tag">LeaveRequest</span></div>
+      <table>
+        <tbody>
+          <tr><td><strong>leave_id</strong></td><td>UUID · PK</td></tr>
+          <tr><td><strong>employee_id</strong></td><td>UUID · FK</td></tr>
+          <tr><td><strong>leave_type</strong></td><td>VARCHAR(50)</td></tr>
+          <tr><td><strong>start_date / end_date</strong></td><td>DATE</td></tr>
+          <tr><td><strong>status</strong></td><td>ENUM('PENDING','APPROVED','REJECTED')</td></tr>
+          <tr><td><strong>approved_by</strong></td><td>UUID · FK → Employee</td></tr>
+          <tr><td><strong>created_at</strong></td><td>TIMESTAMP</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</section>
+
+<!-- ─── SECTION: ROADMAP ─────────────────────────────── -->
+<section id="roadmap">
+  <div class="section-header">
+    <div class="section-tag">06 · Developer Roadmap</div>
+    <h2 class="section-title">Implementation Phases</h2>
+    <p class="section-sub">18-week phased rollout broken down by technical milestones.</p>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">Phase 1 · Weeks 1–3</div>
+    <div class="phase-title">Foundation & Database Setup</div>
+    <div class="phase-desc">Initialize Spring Boot project → Configure PostgreSQL connection → Define JPA entities matching data models → Run Flyway/Liquibase migrations → Verify schema generation.</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">Phase 2 · Weeks 4–6</div>
+    <div class="phase-title">Core API Layer</div>
+    <div class="phase-desc">Implement CRUD REST controllers for Employee, Department, Position → Add Request/Response DTOs → Add input validation → Swagger documentation → Unit tests (JUnit + Mockito).</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">Phase 3 · Weeks 7–9</div>
+    <div class="phase-title">Business Logic & Payroll</div>
+    <div class="phase-desc">Implement PayrollCalculationService → LeaveWorkflowService → PerformanceReviewWorkflowService → Calculate net_pay logic → Audit logging via AOP.</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">Phase 4 · Weeks 10–12</div>
+    <div class="phase-title">Security & Auth</div>
+    <div class="phase-desc">Configure Spring Security with JWT → Role-based endpoint protection (Admin, HR, Manager, Employee) → Stateless session → BCrypt encryption.</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">Phase 5 · Weeks 13–15</div>
+    <div class="phase-title">Frontend Integration</div>
+    <div class="phase-desc">Connect React SPA to REST API → Implement login flow → Build employee list/detail views → Add role-based UI rendering.</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-num">Phase 6 · Weeks 16–18</div>
+    <div class="phase-title">Dashboard & Polish</div>
+    <div class="phase-desc">Summary widgets (total employees, payroll totals, pending leaves) → Advanced search & filter → Pagination → Error handling → Responsive layout.</div>
+  </div>
+</section>
+
+<!-- ─── SECTION: API CONTRACTS ──────────────────────── -->
+<section id="contracts">
+  <div class="section-header">
+    <div class="section-tag">07 · API Contracts</div>
+    <h2 class="section-title">REST API Reference</h2>
+    <p class="section-sub">Base URL: <strong>/api/v1</strong> — Standard response wrapper, error codes.</p>
+  </div>
+
+  <div class="card stagger-item">
+    <div class="card-title">📡 REST Endpoints</div>
+    <pre>GET    /api/v1/employees              — List all employees (paginated, filterable)
+GET    /api/v1/employees/{id}        — Get employee by ID
+POST   /api/v1/employees              — Create employee
+PUT    /api/v1/employees/{id}        — Update employee
+DELETE /api/v1/employees/{id}        — Delete employee
+
+GET    /api/v1/departments            — List departments
+POST   /api/v1/departments           — Create department
+GET    /api/v1/positions             — List positions
+POST   /api/v1/positions            — Create position
+
+GET    /api/v1/payroll/{empId}/{month}  — Get payroll for employee
+POST   /api/v1/payroll/generate        — Generate monthly payroll
+GET    /api/v1/payroll/report          — Payroll summary report
+
+GET    /api/v1/leave                  — List leave requests
+POST   /api/v1/leave                  — Submit leave request
+PUT    /api/v1/leave/{id}/approve    — Approve leave
+PUT    /api/v1/leave/{id}/reject     — Reject leave
+
+GET    /api/v1/reviews                — List performance reviews
+POST   /api/v1/reviews               — Create review
+PUT    /api/v1/reviews/{id}/status    — Update review status
+
+POST   /api/v1/auth/login            — Login { email, password }
+GET    /api/v1/auth/me               — Current user info
+GET    /api/v1/dashboard             — Dashboard summary</pre>
+  </div>
+
+  <div class="grid-2" style="margin-top: 16px;">
+    <div class="card stagger-item">
+      <div class="card-title">✅ Success Response Wrapper</div>
+      <pre>{
+  "success": true,
+  "data": { ... },
+  "message": "Operation successful",
+  "timestamp": "2025-12-01T08:00:00Z"
+}</pre>
+    </div>
+    <div class="card stagger-item">
+      <div class="card-title">❌ Error Response</div>
+      <pre>{
   "success": false,
   "error": {
     "code": "EMPLOYEE_NOT_FOUND",
@@ -659,25 +1592,71 @@ GET    /api/v1/dashboard          — Dashboard summary</pre>
   },
   "timestamp": "2025-12-01T08:00:00Z"
 }</pre>
-        </div>
     </div>
+  </div>
+</section>
 
-</div>
-
-<!-- FOOTER -->
+<!-- ─── FOOTER ─────────────────────────────────────── -->
 <footer>
-    <p>GDT TnP Business Analysis & System Blueprint — Generated by Hermes Business Analysis Agent</p>
-    <p>Document: DT202604231977 · Built for the General Department of Taxation, Cambodia</p>
+  <span>GDT TnP Business Analysis & System Blueprint · DT202604231977</span>
+  <span>Generated by Hermes Business Analysis Agent</span>
 </footer>
 
 <script>
-function showTab(tab) {
-    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-    document.querySelectorAll('.nav-tabs button').forEach(b => { b.classList.remove('active'); b.removeAttribute('data-active'); });
-    document.getElementById('tab-' + tab).classList.add('active');
-    var btn = document.querySelector('.nav-tabs button[onclick="showTab(\'' + tab + '\')"]');
-    if (btn) btn.classList.add('active');
+// ─── MOBILE MENU ───────────────────────────────────────
+const mobileBtn = document.getElementById('mobileBtn');
+const mobileOverlay = document.getElementById('mobileOverlay');
+mobileBtn.addEventListener('click', () => {
+  mobileBtn.classList.toggle('open');
+  mobileOverlay.classList.toggle('open');
+});
+function closeMobile() {
+  mobileBtn.classList.remove('open');
+  mobileOverlay.classList.remove('open');
 }
+
+// ─── SCROLL PROGRESS ─────────────────────────────────
+window.addEventListener('scroll', () => {
+  const scrollable = document.documentElement.scrollHeight - window.innerHeight;
+  const scrolled = (window.scrollY / scrollable) * 100;
+  document.getElementById('scrollProgress').style.width = scrolled + '%';
+});
+
+// ─── PARTICLES ───────────────────────────────────────
+const pData = [
+  { w: 6, h: 6, x: '15%', y: '25%', dur: '3.2s', d: '0s' },
+  { w: 4, h: 4, x: '75%', y: '15%', dur: '4s', d: '0.5s' },
+  { w: 8, h: 8, x: '55%', y: '60%', dur: '3.8s', d: '1s' },
+  { w: 5, h: 5, x: '80%', y: '70%', dur: '4.5s', d: '1.5s', g: true },
+  { w: 3, h: 3, x: '25%', y: '75%', dur: '3.5s', d: '0.8s', g: true },
+  { w: 6, h: 6, x: '45%', y: '35%', dur: '5s', d: '2s' },
+  { w: 4, h: 4, x: '65%', y: '80%', dur: '4s', d: '1.2s', g: true },
+];
+const pEl = document.getElementById('particles');
+pData.forEach(p => {
+  const div = document.createElement('div');
+  div.className = 'hero-particle' + (p.g ? ' glow' : '');
+  div.style.cssText = `width:${p.w}px;height:${p.h}px;left:${p.x};top:${p.y};animation-duration:${p.dur};animation-delay:${p.d};`;
+  pEl.appendChild(div);
+});
+
+// ─── NAV HIGHLIGHT ───────────────────────────────────
+function highlightNav(el) {
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ─── INTERSECTION OBSERVER — stagger ─────────────────
+const staggerItems = document.querySelectorAll('.stagger-item');
+const staggerObs = new IntersectionObserver((items) => {
+  items.forEach(item => {
+    if (item.isIntersecting) {
+      item.target.classList.add('d_visible');
+      staggerObs.unobserve(item.target);
+    }
+  });
+}, { threshold: 0.08 });
+staggerItems.forEach(el => staggerObs.observe(el));
 </script>
 
 </body>
