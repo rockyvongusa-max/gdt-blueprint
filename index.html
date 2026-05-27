@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GDT Business Analysis & System Blueprint</title>
+    <style>
+        :root {
+            --gdt-blue: #003B71;
+            --gdt-red: #E30613;
+            --gdt-gold: #F6A800;
+            --bg-light: #F5F7FA;
+            --text-dark: #1A1A2E;
+            --text-muted: #5A6474;
+            --card-bg: #FFFFFF;
+            --border: #D0D7DE;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            line-height: 1.7;
+        }
+
+        /* HEADER */
+        header {
+            background: linear-gradient(135deg, var(--gdt-blue) 0%, #00527A 100%);
+            color: white;
+            padding: 3rem 2rem 2.5rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, rgba(246,168,0,0.15) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: -30%;
+            left: -5%;
+            width: 300px;
+            height: 300px;
+            background: radial-gradient(circle, rgba(227,6,19,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+        }
+        .header-inner { position: relative; z-index: 1; max-width: 900px; margin: 0 auto; }
+        .header-badge {
+            display: inline-block;
+            background: var(--gdt-gold);
+            color: var(--gdt-blue);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+            margin-bottom: 1.2rem;
+        }
+        h1 {
+            font-size: clamp(1.8rem, 4vw, 2.8rem);
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -0.5px;
+        }
+        .header-subtitle { font-size: 1.05rem; opacity: 0.85; font-weight: 300; }
+        .header-meta {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            opacity: 0.75;
+        }
+        .header-meta span { display: flex; align-items: center; gap: 0.4rem; }
+
+        /* CONTAINER */
+        .container { max-width: 1100px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+
+        /* NAV TABS */
+        .nav-tabs {
+            display: flex;
+            gap: 0.4rem;
+            background: var(--card-bg);
+            padding: 0.5rem;
+            border-radius: 14px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+            margin-bottom: 2.5rem;
+            flex-wrap: wrap;
+            position: sticky;
+            top: 1rem;
+            z-index: 100;
+            border: 1px solid var(--border);
+        }
+        .nav-tabs button {
+            flex: 1;
+            min-width: 120px;
+            padding: 0.65rem 1rem;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.2s ease;
+        }
+        .nav-tabs button:hover { background: var(--bg-light); color: var(--gdt-blue); }
+        .nav-tabs button.active { background: var(--gdt-blue); color: white; }
+
+        /* SECTIONS */
+        .section { display: none; }
+        .section.active { display: block; }
+
+        /* CARD */
+        .card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+            border: 1px solid var(--border);
+        }
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--gdt-blue);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+        }
+        .card-tag {
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            background: var(--gdt-gold);
+            color: var(--gdt-blue);
+            padding: 0.2rem 0.7rem;
+            border-radius: 6px;
+        }
+
+        /* DIAGRAM IMAGE */
+        .diagram-wrap {
+            text-align: center;
+            margin: 1.5rem 0;
+        }
+        .diagram-wrap img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .diagram-label {
+            font-size: 0.8rem;
+            color: var(--text-mutedではありません);
+            margin-top: 0.5 |
+        }
+
+        .text-muted { color: var(--text-muted); font-size: 0.9rem; }
+
+        /* GRID */
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1rem;
+        }
+
+        /* LISTS */
+        ul { padding-left: 1.5rem; margin-top: 0.5rem; }
+        li { margin-bottom: 0.4rem; }
+        ul li::marker { color: var(--gdt-gold); }
+
+        /* TAGS */
+        .tag {
+            display: inline-block;
+            background: #E8F0FE;
+            color: var(--gdt-blue);
+            font-size: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-weight: 600;
+            margin: 0.2rem;
+        }
+
+        /* CODE BLOCKS */
+        pre {
+            background: #1A1A2E;
+            color: #A8D8FF;
+            border-radius: 10px;
+            padding: 1.2rem;
+            overflow-x: auto;
+            margin-top: 1rem;
+            font-size: 0.82rem;
+            line-height: 1.6;
+        }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            font-size: 0.88rem;
+        }
+        th {
+            background: var(--gdt-blue);
+            color: white;
+            padding: 0.7rem 1rem;
+            text-align: left;
+            font-weight: 600;
+        }
+        td {
+            padding: 0.65rem 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        tr:nth-child(even) td { background: var(--bg-light); }
+
+        /* PHASES */
+        .phase {
+            border-left: 4px solid var(--gdt-blue);
+            background: var(--bg-light);
+            padding: 1.2rem;
+            border-radius: 0 12px 12px 0;
+            margin-bottom: 1.5rem;
+        }
+        .phase-num {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: var(--gdt-gold);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .phase-title { font-size: 1.05rem; font-weight: 700; color: var(--gdt-blue); margin: 0.3rem 0; }
+        .phase-desc { font-size: 0.88rem; color: var(--text-muted); }
+
+        /* FOOTER */
+        footer {
+            text-align: center;
+            padding: 2rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            border-top: 1px solid var(--border);
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+    <div class="header-inner">
+        <div class="header-badge">🇰🇭 General Department of Taxation · Cambodia</div>
+        <h1>Business Analysis &<br>System Blueprint</h1>
+        <p class="header-subtitle">TnP Employee Management System — Technical Requirements Document</p>
+        <div class="header-meta">
+            <span>📅 Dec 2025 Draft</span>
+            <span>📄 DT202604231977</span>
+            <span>👤 Business Analysis Agent</span>
+        </div>
+    </div>
+</header>
+
+<div class="container">
+
+    <!-- NAV -->
+    <div class="nav-tabs">
+        <button class="active" onclick="showTab('overview')">📋 Overview</button>
+        <button onclick="showTab('flowchart')">🔀 Flowchart</button>
+        <button onclick="showTab('sequence')">📊 Sequence</button>
+        <button onclick="showTab('class')">🏗️ Class Diagram</button>
+        <button onclick="showTab('data')">🗄️ Data Model</button>
+        <button onclick="showTab('roadmap')">🛤️ Roadmap</button>
+        <button onclick="showTab('contracts')">📡 API Contracts</button>
+    </div>
+
+    <!-- ============================================================
+         TAB 1: OVERVIEW
+    ============================================================ -->
+    <div class="section active" id="tab-overview">
+
+        <div class="card">
+            <div class="card-title">
+                <span class="card-tag">01</span>
+                Project Overview & Scope
+            </div>
+            <p>The General Department of Taxation (GDT) of Cambodia is modernizing its employee management system, currently using a manual paper-based workflow, by developing a digital system called <strong>TnP (Taxation a
+
+nd Payroll)</strong> to manage employee records, salary, and performance evaluation across department heads, HR, and system administrators.</p>
+            <br>
+            <p class="text-muted"><strong>Goal:</strong> Replace paper-based workflows with a structured digital system that supports role-based access control and payroll processing.</p>
+            <div style="margin-top:1rem;">
+                <span class="tag">Role-Based Access</span>
+                <span class="tag">Performance Review</span>
+                <span class="tag">Salary Processing</span>
+                <span class="tag">GDT Internal Use</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                <span class="card-tag">02</span>
+                Functional Requirements
+            </div>
+            <ul>
+                <li><strong>Employee Record Management:</strong> Create/Edit/Delete/View employee records with unique ID, name, DOB, department, position, hire date, status and salary information.</li>
+                <li><strong>Department Management:</strong> CRUD operations for departments (Dept ID, name, description, head).</li>
+                <li><strong>Position Management:</strong> CRUD for positions (Position ID, title, level, salary scale).</li>
+                <li><strong>Performance Review:</strong> Annual review cycle, KPI scoring, promotion recommendations. State management: Draft → Submitted → Reviewed → Final.</li>
+                <li><strong>Payroll Processing:</strong> Monthly payroll records: employee, salary, allowances, deductions, net pay. Gross = Base + Allowances − Deductions.</li>
+                <li><strong>Leave Management:</strong> Leave request workflow: Pending → Approved / Rejected. Paid leave quota per employee.</li>
+                <li><strong>Audit Trail:</strong> System logs all C
+
+UD operations on employee records with old/new values, actor, timestamp.</li>
+                <li><strong>Search & Filter:</strong> Search employees by name, dept, position. Filter by status, department, date range.</li>
+                <li><strong>Dashboard:</strong> Summary widgets: total employees, department counts, payroll totals, pending leave requests.</li>
+                <li><strong>Authentication:</strong> System login with role assignment. Roles: Admin, Manager, HR, Employee.</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                <span class="card-tag">03</span>
+                User Roles & Actors
+                </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Role</th>
+                        <th>Responsibilities</th>
+                        <th>Access Level</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr><td><strong>Admin</strong></td><td>Full system access; manage users, employees, departments, positions</td><td>All modules</td></tr>
+                    <tr><td><strong>HR</strong></td><td>Manage employee records, payroll, leave requests</td><td>HR + Payroll modules</td></tr>
+                    <tr><td><strong>Manager</strong></td><td>Review employee performance, approve leave</td><td>Performance + Leave</td></tr>
+                    <tr><td><strong>Employee</strong></td><td>View own record, submit leave, view payslips</td><td>Self Service Portal</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <div class="card-title">
+                <span class="card-tag">04</span>
+                Technical Stack (Proposed)
+            </div>
+            <ul>
+                <li><strong>Frontend:</strong> React.js (SPA) or Thymeleaf (server-side rendered)</li>
+                <li><strong>Backend:</strong> Java Spring Boot with MVC architecture</li>
+                <li><strong>Database:</strong> PostgreSQL (primary data store) + Redis (caching)</li>
+                <li><strong>Security:</strong> Spring Security with role-based access control</li>
+                <li><strong>API:</strong> RESTful JSON API</li>
+                <li><strong>Documentation
+
+:</strong> Swagger/OpenAPI</li>
+            </ul>
+        </div>
+
+    </div>
+
+    <!-- ============================================================
+         TAB 2: FLOWCHART
+    ============================================================ -->
+    <div class="section" id="tab-flowchart">
+        <div class="card">
+            <div class="card-title">
+                <span class="card-tag">05</span>
+                System Flowchart
+            </div>
+            <div class="diagram-wrap">
+                <img src="https://raw.githubusercontent.com/VongVornRaingsey/gdt-blueprint/main/images/gdt-flowchart.png"
+                     alt="GDT System Flowchart"
+                     onerror="this.style.display='none';document.getElementById('fallback-flowchart').style.display='block';">
+                <p class="text-muted" style="margin-top:0.5rem;">⭐ GDT TnP Workflow — Employee Management Flow</p>
+            </div>
+            <div id="fallback-flowchart" style="display:none;">
+                <p class="text-muted">Flowchart image unavailable. Refer to the sequence and class diagrams for system behavior.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         TAB 3: SEQUENCE
+    ============================================================ -->
+    <div class="section" id
+
+="tab-sequence">
+        <div class="card">
+            <div class="card-title">
+                <span class="card-tag">06</span>
+                Sequence Diagram
+            </div>
+            <div class="diagram-wrap">
+                <img src="https://raw.githubusercontent.com/VongVornRaingsey/gdt-blueprint/main/images/gdt-sequence.png"
+                     alt="GDT Sequence Diagram"
+                     onerror="this.style.display='none';document.getElementById('fallback-sequence').style.display='block';">
+                <p class="text-muted" style="margin-top:0.5rem;">Key interaction sequences between actors and system components</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         TAB 4: CLASS
+    ============================================================ -->
+    <div class="section" id="tab-class">
+        <div class="card">
+            <div class="card-title">
+                <span class="card-tag">07</span>
+                Class Diagram
+            </div>
+            <div class="diagram-wrap">
+                <img src="https://raw.githubusercontent.com/VongVornRaingsey/gdt-blueprint/main/images/gdt-class.png"
+                     alt="GDT Class Diagram"
+                     onerror="this.style.display='none';document.getElementById('fallback-class').style.display='block';">
+                <p class="text-muted" style="margin-top:0.5rem;">Domain model and entity relationships</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+         TAB 5: DATA MODEL
+    ============================================================ -->
+    <div class="section"
+
+ id="tab-data">
+        <div class="card">
+            <div class="card-title">
+                <span class="card-tag">08</span>
+                Data Models
+            </div>
+
+            <table>
+                <thead>
+                    <tr><th colspan="2">Employee</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>employee_id</td><td>UUID · PK</td></tr>
+                    <tr><td>full_name</td><td>VARCHAR(255)</td></tr>
+                    <tr><td>date_of_birth</td><td>DATE</td></tr>
+                    <tr><td>department_id</td><td>UUID · FK</td></tr>
+                    <tr><td>position_id</td><td>UUID · FK</td></tr>
+                    <tr><td>hire_date</td><td>DATE</td></tr>
+                    <tr><td>status</td><td>ENUM('ACTIVE','INACTIVE','TERMINATED')</td></tr>
+                    <tr><td>base_salary</td><td>DECIMAL(12,2)</td></tr>
+                    <tr><td>manager_id</td><td>UUID · FK → Employee</td></tr>
+                    <tr><td>created_at</td><td>TIMESTAMP</td></tr>
+                    <tr><td>updated_at</td><td>TIMESTAMP</td></tr>
+                </tbody>
+            </table>
+
+            <table>
+                <thead>
+                    <tr><th colspan="2">Department</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>department_id</td><td>UUID · PK</td></tr>
+                    <tr><td>name</td><td>VARCHAR(100)</td></tr>
+                    <tr><td>description</td><td>TEXT</td></tr>
+                    <tr><td>head_id</td><td>UUID · FK → Employee</td></tr>
+                    <tr><td>created_at</td><td>TIMESTAMP</td></tr>
+                </tbody>
+            </table>
+
+            <table>
+                <thead>
+                    <tr><th colspan="2">Position</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>position_id</td><td>UUID · PK</td></tr>
+                    <tr><td>title</td><td>VARCHAR(100)</td></tr>
+                    <tr><td>level</td><td>INT</td></tr>
+                    <tr><td>salary_scale_min</td><td>DECIMAL(12,2)</td></tr>
+                    <tr><td>salary_scale_max</td><td>DECIMAL(12,2)</td></tr>
+                </tbody>
+            </table>
+
+            <table>
+                <thead>
+                    <tr><th colspan="2">PerformanceReview</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>review_id</td><td>UUID · PK</td></tr>
+                    <tr><td>employee_id</td><td>UUID · FK</td></tr>
+                    <tr><td>review_date</td><td>DATE</td></tr>
+                    <tr><td>kpi_score</td><td>DECIMAL(5,2)</td></tr>
+                    <tr><td>comments</td><td>TEXT</td></tr>
+                    <tr><td>status</td><td>ENUM('DRAFT','SUBMITTED','REVIEWED','FINAL')</td></tr>
+                    <tr><td>reviewer_id</td><td>UUID · FK → Employee</td></tr>
+                </tbody>
+            </table>
+
+            <table>
+                <thead>
+                    <tr><th colspan="2">Payroll</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>payroll_id</td><td>UUID · PK</td></tr>
+                    <tr><td>employee_id</td><td>UUID · FK</td></tr>
+                    <tr><td>payroll_date</td><td>DATE</td></tr>
+                    <tr><td>base_salary</td><td>DECIMAL(12,2)</td></tr>
+                    <tr><td>total_allowances</td><td>DECIMAL(12,2)</td></tr>
+                    <tr><td>total_deductions</td><td>DECIMAL(12,2)</td></tr>
+                    <tr><td>net_pay</td><td>DECIMAL(12,2)</td></tr>
+                    <tr><td>status</td><td>VARCHAR(20)</td></tr>
+                </tbody>
+            </table>
+
+            <table>
+                <thead>
+                    <tr><th colspan="2">LeaveRequest</th></tr>
+                </thead>
+                <tbody>
+                    <tr><td>leave_id</td><td>UUID · PK</td></tr>
+                    <tr><td>employee_id</td><td>UUID · FK</td></tr>
+                    <tr><td>leave_type</td><td>VARCHAR(50)</td></tr>
+                    <tr><td>start_date</td><td>DATE</td></tr>
+                    <tr><td>end_date</td><td>DATE</td></tr>
+                    <tr><td>status</td><td>ENUM('PENDING','APPROVED','REJECTED')</td></tr>
+                    <tr><td>approved_by</td><td>UUID · FK → Employee</td></tr>
+                    <tr><td>created_at</td><td>TIMESTAMP</td></tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+
+    <!-- ============================================================
+         TAB 6: ROADMAP
+    ============================================================ -->
+    <div class="section" id="tab-roadmap">
+        <div class="card">
+            <div class="card-title">
+                <span class="card-tag">09</span>
+                Developer Roadmap
+            </div>
+
+            <div class="phase">
+                <div class="phase-num">Phase 1 · Weeks 1–3</div>
+                <div class="phase-title">Foundation & Database Setup</div>
+                <div class="phase-desc">
+                    Initialize Spring Boot project > Configure PostgreSQL connection > Define JPA entities matching the data models > Run Flyway/Liquibase migrations > Verify schema generation.
+                </div>
+            </div>
+
+            <div class="phase">
+                <div class="phase-num">Phase 2 · Weeks 4–6</div>
+                <div class="phase-title">Core API Layer</div>
+                <div class="phase-desc">
+                    Implement CRUD REST controllers for Employee, Department, Position > Add Request/Response DTOs > Add input validation > Swagger documentation > Unit tests (JUnit + Mockito).
+                </div>
+            </div>
+
+            <div class="phase">
+                <div class="phase-num">Phase 3 · Weeks 7–9</div>
+                <div class="phase-title">Business Logic & Payroll</div>
+                <div class="phase-desc">
+                    Implement PayrollCalculationService > LeaveWorkflowService > PerformanceReviewWorkflowService > Calculate net_pay logic > Audit logging via AOP/observers.
+                </div>
+            </div>
+
+            <div class="phase">
+                <div class="phase
+
+-num">Phase 4 · Weeks 10–12</div>
+                <div class="phase-title">Security & Auth</div>
+                <div class="phase-desc">
+                    Configure Spring Security with JWT > Role-based endpoint protection (Admin, HR, Manager, Employee) > Stateless session management > Password encryption with BCrypt.
+                </div>
+            </div>
+
+            <div class="phase">
+                <div class="phase-num">Phase 5 · Weeks 13–15</div>
+                <div class="phase-title">Frontend Integration</div>
+                <div class="phase-desc">
+                    Connect React SPA to REST API endpoints > Implement login flow > Build employee list/detail views > Add role-based UI rendering.
+                </div>
+            </div>
+
+            <div class="phase">
+                <div class="phase-num">Phase 6 · Weeks 16–18</div>
+                <div class="phase-title">Dashboard & Polish</div>
+                <div class="phase-desc">
+                    Summary widgets (total employees, payroll totals, pending leaves) > Advanced search & filter > Pagination > Error handling > Responsive layout.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ============================================================
+         TAB 7: API CONTRACTS
+    ============================================================ -->
+    <div class="section" id="tab-contracts">
+        <div class="card">
+            <div class="card-title">
+                <span class="card-tag">10</span>
+                REST API Contracts
+            </div>
+
+            <p><strong>Base URL:</strong> <code>/api/v1</code></p>
+
+            <pre>GET    /api/v1/employees         — List all employees (paginated, filterable)
+GET    /api/v1/employees/{id}      — Get employee by ID
+POST   /api/v1/employees           — Create employee
+PUT    /api/v1/employees/{id}       — Update employee
+DELETE /api/v1/employees/{id}       — Delete employee
+
+GET    /api/v1/departments         — List departments
+POST   /api/v1/departments         — Create department
+GET    /api/v1/positions          — List positions
+POST   /api/v1/positions          — Create position
+
+GET    /api/v1/payroll/{empId}/{month}  — Get payroll for employee
+POST   /api/v1/payroll/generate         — Generate monthly payroll
+GET    /api/v1/payroll/report           — Payroll summary report
+
+GET    /api/v1/leave               — List leave requests
+POST   /api/v1/leave               — Submit leave request
+PUT    /api/v1/leave/{id}/approve — Approve leave
+PUT    /api/v1/leave/{id}/reject   — Reject leave
+
+GET    /api/v1/reviews            — List performance reviews
+POST   /api/v1/reviews            — Create review
+PUT    /api/v1/reviews/{id}/status — Update review status
+
+POST   /api/v1/auth/login         — Login { email, password }
+GET    /api/v1/auth/me            — Current user info
+
+GET    /api/v1/dashboard          — Dashboard summary</pre>
+
+            <br>
+            <p style="font-size:0.88rem;"><strong>Standard Response Wrapper:</strong></p>
+            <pre>{
+  "success": true,
+  "data": { ... },
+  "message": "Operation successful",
+  "timestamp": "2025-12-01T08:00:00Z"
+}</pre>
+
+            <br>
+            <p style="font-size:0.88rem;"><strong>Error Response:</strong></p>
+            <pre>{
+  "success": false,
+  "error": {
+    "code": "EMPLOYEE_NOT_FOUND",
+    "message": "Employee with ID XYZ not found"
+  },
+  "timestamp": "2025-12-01T08:00:00Z"
+}</pre>
+        </div>
+    </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer>
+    <p>GDT TnP Business Analysis & System Blueprint — Generated by Hermes Business Analysis Agent</p>
+    <p>Document: DT202604231977 · Built for the General Department of Taxation, Cambodia</p>
+</footer>
+
+<script>
+function showTab(tab) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-tabs button').forEach(b => b.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.querySelector('.nav-tabs button[onclick*=
+
+"' + tab + '"]').classList.add('active');
+}
+</script>
+
+</body>
+</html>
