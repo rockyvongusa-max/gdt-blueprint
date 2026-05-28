@@ -1,0 +1,24 @@
+{
+  "name": "gdt-blueprint",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rockyvongusa-max/gdt-blueprint.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/rockyvongusa-max/gdt-blueprint/issues"
+  },
+  "homepage": "https://github.com/rockyvongusa-max/gdt-blueprint#readme",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0"
+  }
+}
